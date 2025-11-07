@@ -229,8 +229,8 @@ export default function App() {
   };
 
   const handleGetFullReport = () => {
-    // Redirect to GHL checkout page (Fiza will provide URL)
-    const checkoutUrl = 'https://brandscaling.gohighlevel.com/checkout/edna-report';
+    // Redirect to GHL checkout page
+    const checkoutUrl = 'https://go.brandscaling.co.uk/checkout-page-quiz-report';
     
     // Store email and result ID for post-purchase email
     if (verifiedEmail) {
