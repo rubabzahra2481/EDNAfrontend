@@ -23,7 +23,7 @@ export function EmailVerification({ onVerified, onCancel }: EmailVerificationPro
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: false, // Don't create user, just verify email
+          shouldCreateUser: true, // Don't create user, just verify email
         }
       });
 
