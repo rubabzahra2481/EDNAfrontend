@@ -99,7 +99,10 @@ export function Home({ onViewChange }: HomeProps) {
                   <span className="typo-body-bs text-gray-700">Prioritises data-driven decisions</span>
                 </li>
               </ul>
-              <button className="mt-6 w-full py-3 border-2 border-purple-600 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors font-medium text-center">
+              <button
+                onClick={() => onViewChange('chat')}
+                className="mt-6 w-full py-3 border-2 border-purple-600 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors font-medium text-center"
+              >
                 Meet the Architect
               </button>
             </div>
@@ -129,7 +132,10 @@ export function Home({ onViewChange }: HomeProps) {
                   <span className="typo-body-bs text-gray-700">Crafts vision—often rally agreements</span>
                 </li>
               </ul>
-              <button className="mt-6 w-full py-3 border-2 border-orange-500 text-orange-700 rounded-lg hover:bg-orange-50 transition-colors font-medium text-center">
+              <button
+                onClick={() => onViewChange('chat')}
+                className="mt-6 w-full py-3 border-2 border-orange-500 text-orange-700 rounded-lg hover:bg-orange-50 transition-colors font-medium text-center"
+              >
                 Meet the Alchemist
               </button>
             </div>

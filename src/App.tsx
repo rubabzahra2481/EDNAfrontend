@@ -10,6 +10,7 @@ import { LMSDashboard } from './components/LMSDashboard';
 import { PersonalizedLMS } from './components/PersonalizedLMS';
 import { AIChat } from './components/AIChat';
 import { PersonalizedAIChat } from './components/PersonalizedAIChat';
+import { AIMentorHub } from './components/AIMentorHub';
 import { ProfileInsights } from './components/ProfileInsights';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { AuthScreens } from './components/AuthScreens';
@@ -172,15 +173,18 @@ export default function App() {
   };
 
   const handleViewChange = (view: string) => {
-    // Require authentication only for dashboard and chat (NOT quiz)
-    if (!isAuthenticated && (view === 'dashboard' || view === 'chat')) {
+    // Require authentication for quiz, dashboard, and AI mentor (chat)
+    if (!isAuthenticated && (view === 'quiz' || view === 'dashboard' || view === 'chat')) {
       setShowAuth(true);
       return;
     }
-    
-    // Quiz is now accessible without authentication
-    // No onboarding needed - direct access to quiz
-    
+
+    // Show onboarding for first-time quiz takers
+    if (view === 'quiz' && !quizResults) {
+      setShowOnboarding(true);
+      return;
+    }
+
     setCurrentView(view);
   };
 
@@ -347,14 +351,7 @@ export default function App() {
       )}
       
       {currentView === 'chat' && isAuthenticated && (
-        quizResults ? (
-          <PersonalizedAIChat 
-            profile={quizResults}
-            persona={quizResults.core_type === 'blurred' ? 'architect' : quizResults.core_type} 
-          />
-        ) : (
-          <AIChat persona="architect" />
-        )
+        <AIMentorHub />
       )}
       
       {currentView === 'insights' && quizResults && (
