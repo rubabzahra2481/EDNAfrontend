@@ -3,7 +3,6 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Separator } from './ui/separator';
 import { Alert, AlertDescription } from './ui/alert';
 import { 
   Mail, 
@@ -484,24 +483,7 @@ export function AuthScreens({ onAuthenticate, onCancel }: AuthScreensProps) {
             {mode === 'register' && renderRegisterForm()}
             {mode === 'forgot-password' && renderForgotPasswordForm()}
             {mode === 'reset-success' && renderResetSuccess()}
-            
-            {mode !== 'reset-success' && (
-              <>
-                <div className="relative">
-                  <Separator />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="bg-white px-2 text-sm text-gray-500">Demo Credentials</span>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                  <p className="text-gray-600 mb-1">For demo purposes:</p>
-                  <p className="text-xs text-gray-500">Email: demo@brandscaling.co.uk</p>
-                  <p className="text-xs text-gray-500">Password: password</p>
-                </div>
-              </>
-            )}
-            
+
             <div className="text-center">
               <button
                 onClick={onCancel}

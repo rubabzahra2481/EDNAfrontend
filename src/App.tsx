@@ -173,14 +173,16 @@ export default function App() {
   };
 
   const handleViewChange = (view: string) => {
-    // Require authentication for quiz, dashboard, and AI mentor (chat)
-    if (!isAuthenticated && (view === 'quiz' || view === 'dashboard' || view === 'chat')) {
+    // Require authentication for dashboard and AI mentor (chat) only
+    // Quiz is now publicly accessible without authentication
+    if (!isAuthenticated && (view === 'dashboard' || view === 'chat')) {
       setShowAuth(true);
       return;
     }
 
-    // Show onboarding for first-time quiz takers
-    if (view === 'quiz' && !quizResults) {
+    // Show onboarding for authenticated first-time quiz takers only
+    // Unauthenticated users can take quiz directly without onboarding
+    if (view === 'quiz' && isAuthenticated && !quizResults) {
       setShowOnboarding(true);
       return;
     }
