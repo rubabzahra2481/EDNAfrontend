@@ -3,13 +3,59 @@
  * Selection between Architect and Alchemist AI Mentors
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Target, Lightbulb } from 'lucide-react';
+import { authHelpers } from '../utils/supabase/client';
 
 type MentorId = 'architect' | 'alchemist';
 
 export function AIMentorHub() {
   const [selectedMentor, setSelectedMentor] = useState<MentorId | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+
+  // Send session token to iframe when it loads
+  useEffect(() => {
+    const sendSessionToIframe = async () => {
+      // Only send if iframe is loaded and alchemist is selected
+      if (!isIframeLoaded || selectedMentor !== 'alchemist' || !iframeRef.current) {
+        return;
+      }
+
+      try {
+        // Get the current Supabase session
+        const { session, error } = await authHelpers.getSession();
+
+        if (error) {
+          console.error('Failed to get session for iframe:', error);
+          return;
+        }
+
+        if (session?.access_token) {
+          // Send the access token to the iframe
+          const targetOrigin = 'https://main.d3970mma5pzr9g.amplifyapp.com';
+
+          iframeRef.current.contentWindow?.postMessage(
+            {
+              type: 'SUPABASE_AUTH',
+              accessToken: session.access_token,
+              refreshToken: session.refresh_token,
+              user: session.user
+            },
+            targetOrigin
+          );
+
+          console.log('✅ Session token sent to iframe');
+        } else {
+          console.log('ℹ️ No active session to send to iframe');
+        }
+      } catch (err) {
+        console.error('Error sending session to iframe:', err);
+      }
+    };
+
+    sendSessionToIframe();
+  }, [isIframeLoaded, selectedMentor]);
 
   // Coming Soon screen for Architect
   if (selectedMentor === 'architect') {
@@ -70,11 +116,13 @@ export function AIMentorHub() {
         {/* Iframe container */}
         <div className="flex-1 w-full">
           <iframe
+            ref={iframeRef}
             src="https://main.d3970mma5pzr9g.amplifyapp.com/"
             className="w-full h-full border-0"
             style={{ minHeight: 'calc(100vh - 80px)' }}
             title="The AI Alchemist"
             allow="camera; microphone"
+            onLoad={() => setIsIframeLoaded(true)}
           />
         </div>
       </div>
