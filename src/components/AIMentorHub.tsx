@@ -57,6 +57,56 @@ export function AIMentorHub() {
     sendSessionToIframe();
   }, [isIframeLoaded, selectedMentor]);
 
+  // 🆕 NEW: Listen for token refresh requests from iframe
+  useEffect(() => {
+    const handleTokenRequest = async (event: MessageEvent) => {
+      // Security: Only accept messages from AI Alchemist
+      const alchemistOrigin = 'https://main.d3970mma5pzr9g.amplifyapp.com';
+      
+      if (event.origin !== alchemistOrigin) {
+        return; // Ignore messages from other origins
+      }
+
+      // Check if iframe is requesting token (initial or refresh)
+      if (event.data && 
+          (event.data.type === 'REQUEST_SUPABASE_TOKEN' || 
+           event.data.type === 'REQUEST_FRESH_TOKEN')) {
+        
+        console.log('📨 Iframe requesting token:', event.data.type);
+        
+        try {
+          // Get fresh session from Supabase
+          const { session, error } = await authHelpers.getSession();
+
+          if (error) {
+            console.error('❌ Failed to get session:', error);
+            return;
+          }
+
+          if (session?.access_token && iframeRef.current) {
+            // Send token to iframe
+            iframeRef.current.contentWindow?.postMessage(
+              {
+                type: 'SUPABASE_AUTH',
+                accessToken: session.access_token,
+                refreshToken: session.refresh_token,
+                user: session.user
+              },
+              alchemistOrigin
+            );
+
+            console.log('✅ Fresh token sent to iframe');
+          }
+        } catch (err) {
+          console.error('❌ Error sending session to iframe:', err);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleTokenRequest);
+    return () => window.removeEventListener('message', handleTokenRequest);
+  }, []);
+
   // Coming Soon screen for Architect
   if (selectedMentor === 'architect') {
     return (
@@ -170,7 +220,7 @@ export function AIMentorHub() {
               </ul>
               <button
                 onClick={() => setSelectedMentor('architect')}
-                className="mt-6 w-full py-3 border-2 borde...lg hover:bg-purple-50 transition-colors font-medium text-center"
+                className="mt-6 w-full py-3 border-2 border-purple-600 rounded-lg hover:bg-purple-50 transition-colors font-medium text-center"
               >
                 Meet the Architect
               </button>
@@ -203,7 +253,7 @@ export function AIMentorHub() {
               </ul>
               <button
                 onClick={() => setSelectedMentor('alchemist')}
-                className="mt-6 w-full py-3 border-2 border-oran...lg hover:bg-orange-50 transition-colors font-medium text-center"
+                className="mt-6 w-full py-3 border-2 border-orange-500 rounded-lg hover:bg-orange-50 transition-colors font-medium text-center"
               >
                 Meet the Alchemist
               </button>
