@@ -62,13 +62,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             EDNA (Entrepreneurial DNA) maps <strong>7 layers</strong> of your cognitive, behavioral, and values profile:
           </p>
           <div className="space-y-3">
-            <LayerPreview number={1} title="Core Type" description="Architect, Alchemist, or Blurred" color="purple" />
-            <LayerPreview number={2} title="Subtype" description="11 detailed profiles with strengths & blindspots" color="blue" />
-            <LayerPreview number={3} title="Mirror Awareness" description="How well you access your opposite validator" color="indigo" />
-            <LayerPreview number={4} title="Learning Style" description="Modality, approach, pace, environment" color="teal" />
-            <LayerPreview number={5} title="Neurodiversity" description="4 capability domains with adaptations" color="green" />
-            <LayerPreview number={6} title="Mindset & Personality" description="Growth mindset, risk tolerance, energy source" color="pink" />
-            <LayerPreview number={7} title="Meta-Beliefs & Values" description="6 value axes (0-100 scoring)" color="rose" />
+            <LayerPreview number={1} title="Core Type" description="Shows your core decision loop: how you naturally think, feel, and choose." color="purple" />
+            <LayerPreview number={2} title="Subtype" description="How you move from a decision into action, including your typical patterns and tendencies." color="blue" />
+            <LayerPreview number={3} title="Mirror Awareness" description="How well you understand and collaborate with people who make decisions differently from you." color="indigo" />
+            <LayerPreview number={4} title="Learning Style" description="How you learn best; whether through seeing, hearing, doing, structure, or big-picture thinking." color="teal" />
+            <LayerPreview number={5} title="Neurodiversity" description="Whether you rely more on logic, intuition, or emotion when making decisions and navigating your environment." color="green" />
+            <LayerPreview number={6} title="Mindset & Personality" description="Reflects your mindset, traits, and behaviours; how you respond to pressure, risk, feedback, and growth." color="pink" />
+            <LayerPreview number={7} title="Meta-Beliefs & Values" description="Uncovers the deeper values that drive your choices like freedom, purpose, profit, impact, or autonomy." color="rose" />
           </div>
         </div>
       )
@@ -79,7 +79,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       content: (
         <div className="space-y-4">
           <p className="text-lg">
-            You'll answer <strong>30 questions</strong> that map your complete EDNA profile.
+            You'll answer <strong>45 questions</strong> that map your complete EDNA profile.
           </p>
           <Card className="bg-gradient-to-r from-purple-50 to-orange-50">
             <CardContent className="pt-6">
@@ -115,12 +115,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       )
     },
     {
-      title: 'Your Personalized Experience',
+      title: 'Decision Intelligence',
       icon: Award,
       content: (
         <div className="space-y-4">
           <p className="text-lg">
-            After completing the assessment, <strong>every aspect</strong> of the platform adapts to your profile:
+            Your E-DNA profile powers a personalised Decision Intelligence system that helps you understand how you think and make decisions.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <FeatureCard 
