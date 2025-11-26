@@ -33,7 +33,7 @@ export function FigmaResultsPage({ results, userEmail, onGetFullReport, onViewCh
     },
     mixed: {
       gradient: 'from-purple-900 via-orange-500 to-purple-900',
-      bg: 'bg-gradient-to-r from-purple-900 to-orange-500',
+      //bg: 'bg-gradient-to-r from-purple-900 to-orange-500',
       text: 'text-purple-900',
       border: 'border-purple-500'
     }
