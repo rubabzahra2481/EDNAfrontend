@@ -16,7 +16,9 @@ interface NewEDNAQuizProps {
 }
 
 export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuizProps) {
-  const [showOnboarding, setShowOnboarding] = useState(true);
+  // Check if user has already seen onboarding (persist in localStorage)
+  const hasSeenOnboarding = localStorage.getItem('edna-onboarding-completed') === 'true';
+  const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding);
   const [currentLayer, setCurrentLayer] = useState(1);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<UserAnswers>({});
@@ -49,6 +51,8 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
 
   // Handle onboarding complete
   const handleOnboardingComplete = () => {
+    // Mark onboarding as completed in localStorage so it doesn't show again
+    localStorage.setItem('edna-onboarding-completed', 'true');
     setShowOnboarding(false);
   };
 
