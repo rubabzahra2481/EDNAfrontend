@@ -97,6 +97,22 @@ export default function App() {
       }
     }
 
+    // Restore quiz completion timestamp from localStorage
+    const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
+    if (savedQuizCompletedAt) {
+      try {
+        const completedDate = new Date(savedQuizCompletedAt);
+        // Only restore if it's a valid date and within the last 7 days
+        if (!isNaN(completedDate.getTime())) {
+          setQuizCompletedAt(completedDate);
+          console.log('✅ Restored quiz completion timestamp from localStorage:', completedDate);
+        }
+      } catch (err) {
+        console.error('⚠️ Failed to restore quiz completion timestamp:', err);
+        localStorage.removeItem('quizCompletedAt');
+      }
+    }
+
     // Check backend status (non-blocking, just for logging)
     checkBackendStatus();
     
@@ -208,7 +224,10 @@ export default function App() {
           setQuizResults(data.results);
           // Store quiz completion timestamp for 7-day cooldown
           if (data.createdAt) {
-            setQuizCompletedAt(new Date(data.createdAt));
+            const completedDate = new Date(data.createdAt);
+            setQuizCompletedAt(completedDate);
+            // Persist to localStorage
+            localStorage.setItem('quizCompletedAt', completedDate.toISOString());
           }
           console.log('✅ Loaded quiz results from backend for', userEmail);
         }
@@ -309,13 +328,33 @@ export default function App() {
       return;
     }
 
-    // Check 7-day cooldown for quiz retake
-    // Don't block navigation - let the quiz view show the cooldown message
-    if (view === 'quiz' && quizResults && quizCompletedAt) {
-      const daysSinceCompletion = (new Date().getTime() - quizCompletedAt.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceCompletion < 7) {
-        console.log(`⏳ Quiz cooldown active. ${(7 - daysSinceCompletion).toFixed(1)} days remaining`);
-        // Continue to setCurrentView below to show cooldown message
+    // Check 7-day cooldown for quiz retake - ENFORCE STRICTLY
+    if (view === 'quiz') {
+      // Check both state and localStorage for completion timestamp
+      const checkDate = quizCompletedAt || (() => {
+        const saved = localStorage.getItem('quizCompletedAt');
+        return saved ? new Date(saved) : null;
+      })();
+      
+      // Also check if user has quiz results (indicates they completed the quiz)
+      const hasCompletedQuiz = quizResults || localStorage.getItem('pendingQuizResults');
+      
+      if (hasCompletedQuiz && checkDate) {
+        const daysSinceCompletion = (new Date().getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceCompletion < 7) {
+          const daysRemaining = Math.ceil(7 - daysSinceCompletion);
+          console.log(`⏳ Quiz cooldown active. ${daysRemaining} days remaining`);
+          // Set the timestamp in state if it was only in localStorage
+          if (!quizCompletedAt && checkDate) {
+            setQuizCompletedAt(checkDate);
+          }
+          // Continue to setCurrentView below to show cooldown message
+        } else {
+          // Cooldown expired, clear the timestamp
+          console.log('✅ Quiz cooldown expired, allowing retake');
+          setQuizCompletedAt(null);
+          localStorage.removeItem('quizCompletedAt');
+        }
       }
     }
 
@@ -358,6 +397,9 @@ export default function App() {
     // Allow retake if cooldown has expired
     setQuizResults(null);
     setQuizCompletedAt(null);
+    localStorage.removeItem('quizCompletedAt');
+    localStorage.removeItem('pendingQuizResults');
+    localStorage.removeItem('pendingVerifiedEmail');
     setVerifiedEmail(null);
     setShowShortResults(false);
     setCurrentView('quiz');
@@ -399,7 +441,11 @@ export default function App() {
           localStorage.setItem('resultId', data.resultId);
           localStorage.setItem('userEmail', email);
           // Set quiz completion timestamp for 7-day cooldown
-          setQuizCompletedAt(new Date());
+          const completedDate = new Date();
+          setQuizCompletedAt(completedDate);
+          // Persist to localStorage
+          localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+          console.log('✅ Quiz completion timestamp saved:', completedDate);
         }
       } catch (error) {
         console.error('Failed to save results:', error);
@@ -499,15 +545,34 @@ export default function App() {
       
       {currentView === 'quiz' && (() => {
         // Check if user is in 7-day cooldown period
-        if (quizResults && quizCompletedAt) {
-          const daysSinceCompletion = (new Date().getTime() - quizCompletedAt.getTime()) / (1000 * 60 * 60 * 24);
+        // Check both state and localStorage for completion timestamp
+        const checkDate = quizCompletedAt || (() => {
+          const saved = localStorage.getItem('quizCompletedAt');
+          return saved ? new Date(saved) : null;
+        })();
+        
+        // Also check if user has quiz results (indicates they completed the quiz)
+        const hasCompletedQuiz = quizResults || localStorage.getItem('pendingQuizResults');
+        
+        if (hasCompletedQuiz && checkDate) {
+          const daysSinceCompletion = (new Date().getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24);
           if (daysSinceCompletion < 7) {
+            // Set the timestamp in state if it was only in localStorage
+            if (!quizCompletedAt && checkDate) {
+              setQuizCompletedAt(checkDate);
+            }
             return (
               <QuizCooldownMessage 
-                completedAt={quizCompletedAt}
+                completedAt={checkDate}
                 onViewDashboard={() => setCurrentView('dashboard')}
               />
             );
+          } else {
+            // Cooldown expired, clear the timestamp
+            if (quizCompletedAt) {
+              setQuizCompletedAt(null);
+              localStorage.removeItem('quizCompletedAt');
+            }
           }
         }
         // Show quiz if no cooldown or cooldown expired

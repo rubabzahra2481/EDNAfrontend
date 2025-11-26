@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { EDNAResults } from '../lib/scoring';
 import { Home } from 'lucide-react';
 import brandscalingLogo from 'figma:asset/4ffc1593ac524b5a444c05cca1a8149a7e87be86.png';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface CompleteResultsPageProps {
   results: EDNAResults;
@@ -147,57 +149,110 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     }
   };
 
-  // PDF Download Handler
+  // PDF content ref
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+
+  // PDF Download Handler - Client-side generation
   const handleDownloadPDF = async () => {
+    const button = document.querySelector('[data-pdf-download]') as HTMLButtonElement;
+    const originalText = button?.textContent || 'Download';
+    
     try {
-      const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:8080';
-      
       // Show loading state
-      const button = document.querySelector('[data-pdf-download]') as HTMLButtonElement;
       if (button) {
-        const originalText = button.textContent;
         button.textContent = 'Generating PDF...';
         button.disabled = true;
-        
-        // Reset after timeout
-        setTimeout(() => {
-          if (button) {
-            button.textContent = originalText;
-            button.disabled = false;
-          }
-        }, 10000);
       }
 
-      // Call backend to generate PDF
-      const response = await fetch(`${backendUrl}/api/quiz/generate-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: userEmail,
-          results: results,
-        }),
+      // Find the main content container
+      const contentElement = pdfContentRef.current || document.querySelector('.max-w-4xl') || document.body;
+      
+      if (!contentElement) {
+        throw new Error('Content element not found');
+      }
+
+      // Hide elements that shouldn't be in PDF (buttons, navigation)
+      const elementsToHide = document.querySelectorAll('header, [data-pdf-download], button');
+      const originalDisplay: string[] = [];
+      elementsToHide.forEach((el) => {
+        originalDisplay.push((el as HTMLElement).style.display);
+        (el as HTMLElement).style.display = 'none';
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+      // Scroll to top to ensure we capture from the beginning
+      window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Generate canvas from HTML
+      const canvas = await html2canvas(contentElement as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: contentElement.scrollWidth,
+        height: contentElement.scrollHeight,
+        windowWidth: contentElement.scrollWidth,
+        windowHeight: contentElement.scrollHeight,
+      });
+
+      // Restore hidden elements
+      elementsToHide.forEach((el, index) => {
+        (el as HTMLElement).style.display = originalDisplay[index] || '';
+      });
+
+      // Calculate PDF dimensions (A4: 210mm x 297mm)
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = (imgHeight * pdfWidth) / imgWidth; // Maintain aspect ratio
+      const pageHeight = 297; // A4 height in mm
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Add image to PDF with proper pagination
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if content is taller than one page
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pageHeight;
       }
 
-      const data = await response.json();
-      
-      // If we get a download URL, open it
-      if (data.downloadUrl) {
-        window.open(data.downloadUrl, '_blank');
-      } else if (data.token) {
-        // If we get a token, use the download endpoint
-        window.open(`${backendUrl}/api/quiz/download?token=${data.token}`, '_blank');
-      } else {
-        // Fallback to print dialog
-        window.print();
+      // Generate filename
+      const coreTypeName = core_type === 'alchemist' ? 'Alchemist' : 
+                          core_type === 'architect' ? 'Architect' : 'Mixed';
+      const filename = `EDNA-Results-${coreTypeName}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+      // Download PDF
+      pdf.save(filename);
+
+      // Reset button
+      if (button) {
+        button.textContent = originalText;
+        button.disabled = false;
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
+      
+      // Reset button
+      if (button) {
+        button.textContent = originalText;
+        button.disabled = false;
+      }
+      
       // Fallback to browser print
       alert('PDF generation failed. Opening print dialog instead.');
       window.print();
@@ -470,7 +525,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         </header>
 
         {/* MAIN CONTENT */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div ref={pdfContentRef} className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
@@ -1344,7 +1399,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         </header>
 
         {/* MAIN CONTENT */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div ref={pdfContentRef} className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
@@ -2208,7 +2263,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         </header>
 
         {/* MAIN CONTENT */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        <div ref={pdfContentRef} className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
@@ -2944,7 +2999,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div ref={pdfContentRef} className="max-w-4xl mx-auto px-6 py-8">
         {/* Title */}
         <h1 className={`text-4xl font-bold text-center bg-gradient-to-r ${gradientClass} bg-clip-text text-transparent mb-4`}>
           {coreTypeDisplay}
