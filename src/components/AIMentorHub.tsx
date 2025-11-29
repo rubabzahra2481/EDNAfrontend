@@ -6,11 +6,25 @@
 import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Target, Lightbulb } from 'lucide-react';
 import { getAgentToken, sendTokenToIframe } from '../utils/agentToken';
+import { AI_MENTOR_URL } from '../config';
 
 type MentorId = 'architect' | 'alchemist';
 
-export function AIMentorHub() {
-  const [selectedMentor, setSelectedMentor] = useState<MentorId | null>(null);
+interface AIMentorHubProps {
+  onViewChange?: (view: string) => void;
+  isInDashboard?: boolean;
+  initialMentor?: MentorId;
+}
+
+export function AIMentorHub({ onViewChange, isInDashboard = false, initialMentor }: AIMentorHubProps) {
+  const [selectedMentor, setSelectedMentor] = useState<MentorId | null>(initialMentor || null);
+  
+  // Update selected mentor when initialMentor prop changes
+  useEffect(() => {
+    if (initialMentor) {
+      setSelectedMentor(initialMentor);
+    }
+  }, [initialMentor]);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
 
@@ -32,7 +46,7 @@ export function AIMentorHub() {
         }
 
         // Send the Agent token to the iframe
-        const targetOrigin = 'https://main.d3970mma5pzr9g.amplifyapp.com';
+        const targetOrigin = AI_MENTOR_URL;
         sendTokenToIframe(iframeRef.current, agentToken, targetOrigin);
 
       } catch (err) {
@@ -43,70 +57,18 @@ export function AIMentorHub() {
     sendAgentTokenToIframe();
   }, [isIframeLoaded, selectedMentor]);
 
-  // Coming Soon screen for Architect
-  if (selectedMentor === 'architect') {
-    return (
-      <div className="min-h-screen bg-white">
-        <div className="container-bs-desktop section-padding-bs">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-20 h-20 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-6">
-              <Target className="w-10 h-10 text-purple-700" />
-            </div>
-            <h1 className="typo-h1-bs mb-4">The AI Architect</h1>
-            <div className="inline-block bg-purple-600 text-white px-6 py-2 rounded-full mb-6">
-              Coming Soon
-            </div>
-            <p className="typo-body-bs text-gray-600 mb-8">
-              The AI Architect is currently being trained on advanced operating systems, SOP libraries and data-driven frameworks.
-              Check back soon for your logical, strategic AI business partner.
-            </p>
-            <button
-              onClick={() => setSelectedMentor(null)}
-              className="px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-            >
-              Back to Mentor Hub
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Active iframe experience for Alchemist
-  if (selectedMentor === 'alchemist') {
+  // Load deployed agent directly in iframe for both mentors
+  if (selectedMentor === 'architect' || selectedMentor === 'alchemist') {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        {/* Header */}
-        <div className="border-b border-gray-200 bg-white">
-          <div className="container-bs-desktop py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                  <Lightbulb className="w-5 h-5 text-orange-700" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900">The AI Alchemist</h2>
-                  <p className="text-sm text-gray-600">Creative • Energetic • Experimental</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedMentor(null)}
-                className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-              >
-                Back to Mentor Hub
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Iframe container */}
-        <div className="flex-1 w-full">
+        {/* Iframe container - full page, loads deployed agent */}
+        <div className="flex-1 w-full" style={{ minHeight: 0 }}>
           <iframe
             ref={iframeRef}
-            src="https://main.d3970mma5pzr9g.amplifyapp.com/"
+            src={`${AI_MENTOR_URL}/`}
             className="w-full h-full border-0"
-            style={{ minHeight: 'calc(100vh - 80px)' }}
-            title="The AI Alchemist"
+            style={{ height: '100%', minHeight: '100vh' }}
+            title={selectedMentor === 'architect' ? 'The AI Architect' : 'The AI Alchemist'}
             allow="camera; microphone"
             onLoad={() => setIsIframeLoaded(true)}
           />
@@ -117,7 +79,7 @@ export function AIMentorHub() {
 
   // Default: mentor selection screen
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full bg-gray-50">
       <section className="section-padding-bs">
         <div className="container-bs-desktop">
           <div className="text-center mb-[var(--bs-spacing-section-heading)]">
@@ -155,7 +117,15 @@ export function AIMentorHub() {
                 </li>
               </ul>
               <button
-                onClick={() => setSelectedMentor('architect')}
+                onClick={() => {
+                  if (isInDashboard && onViewChange) {
+                    // Navigate to separate page when in dashboard
+                    onViewChange('architect-mentor');
+                  } else {
+                    // Show within component when not in dashboard
+                    setSelectedMentor('architect');
+                  }
+                }}
                 className="mt-6 w-full py-3 border-2 borde...lg hover:bg-purple-50 transition-colors font-medium text-center"
               >
                 Meet the Architect
@@ -188,7 +158,15 @@ export function AIMentorHub() {
                 </li>
               </ul>
               <button
-                onClick={() => setSelectedMentor('alchemist')}
+                onClick={() => {
+                  if (isInDashboard && onViewChange) {
+                    // Navigate to separate page when in dashboard
+                    onViewChange('alchemist-mentor');
+                  } else {
+                    // Show within component when not in dashboard
+                    setSelectedMentor('alchemist');
+                  }
+                }}
                 className="mt-6 w-full py-3 border-2 border-oran...lg hover:bg-orange-50 transition-colors font-medium text-center"
               >
                 Meet the Alchemist

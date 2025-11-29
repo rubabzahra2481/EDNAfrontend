@@ -13,9 +13,10 @@ interface NavigationProps {
   onViewChange: (view: string) => void;
   isAuthenticated: boolean;
   onAuthToggle: () => void;
+  isSticky?: boolean;
 }
 
-export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthToggle }: NavigationProps) {
+export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthToggle, isSticky = false }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -33,7 +34,17 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-100">
+    <nav 
+      className={`bg-white border-b border-gray-100 ${isSticky ? 'sticky top-0 z-50' : ''}`}
+      style={isSticky ? { 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backgroundColor: 'white'
+      } : {}}
+    >
       {/* Gradient stripe at top */}
       <div className="h-[6px] bg-gradient-arch-scale-90" aria-hidden="true" />
       
@@ -58,7 +69,8 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
 
           {/* Desktop Navigation & Auth Button */}
           <div className="hidden md:flex md:items-center md:space-x-2">
-            {navItems.map((item) => {
+            {/* Hide navigation buttons when in dashboard view */}
+            {currentView !== 'dashboard' && navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
               return (
@@ -115,7 +127,8 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <div className="px-4 py-3 space-y-2">
-            {navItems.map((item) => {
+            {/* Hide navigation buttons when in dashboard view */}
+            {currentView !== 'dashboard' && navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
               return (

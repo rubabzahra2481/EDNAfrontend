@@ -39,6 +39,76 @@ export default function App() {
     return <PDFResultsPage />;
   }
 
+  // Test Routes for viewing result pages separately
+  if (window.location.pathname === '/test/alchemist' || window.location.pathname === '/test/architect' || window.location.pathname === '/test/mixed') {
+    const path = window.location.pathname;
+    let mockResults: EDNAResults;
+    
+    if (path === '/test/alchemist') {
+      mockResults = {
+        core_type: 'alchemist',
+        core_type_mastery: 85,
+        opposite_awareness: { R: 70, T: 65, I: 60, G: 55, C: 50, overall: 60 },
+        mirror_awareness_level: 'moderate',
+        mirror_awareness_score: 60,
+        subtype: ['Visionary Oracle'],
+        subtype_mastery: 80,
+        subtype_display: 'Visionary Oracle',
+        learning_style: {
+          dominant: 'Visual',
+          percentages: { visual: 40, auditory: 20, readWrite: 20, kinesthetic: 20 }
+        },
+        neurodiversity: { indicators: ['ADHD'], score: 6 },
+        mindset: { traits: ['Growth'], score: 8 },
+        personality: { traits: ['Confident'], score: 7 }
+      } as EDNAResults;
+    } else if (path === '/test/architect') {
+      mockResults = {
+        core_type: 'architect',
+        core_type_mastery: 90,
+        opposite_awareness: { R: 75, T: 70, I: 65, G: 60, C: 55, overall: 65 },
+        mirror_awareness_level: 'high',
+        mirror_awareness_score: 70,
+        subtype: ['Master Strategist'],
+        subtype_mastery: 85,
+        subtype_display: 'Master Strategist',
+        learning_style: {
+          dominant: 'Kinesthetic',
+          percentages: { visual: 25, auditory: 25, readWrite: 25, kinesthetic: 25 }
+        },
+        neurodiversity: { indicators: [], score: 2 },
+        mindset: { traits: ['Growth'], score: 9 },
+        personality: { traits: ['Confident'], score: 8 }
+      } as EDNAResults;
+    } else { // mixed
+      mockResults = {
+        core_type: 'blurred',
+        core_type_mastery: 50,
+        opposite_awareness: { R: 50, T: 50, I: 50, G: 50, C: 50, overall: 50 },
+        mirror_awareness_level: 'low',
+        mirror_awareness_score: 40,
+        subtype: ['Mixed'],
+        subtype_mastery: 45,
+        subtype_display: 'Mixed',
+        learning_style: {
+          dominant: 'Visual',
+          percentages: { visual: 30, auditory: 25, readWrite: 25, kinesthetic: 20 }
+        },
+        neurodiversity: { indicators: [], score: 4 },
+        mindset: { traits: ['Growth'], score: 6 },
+        personality: { traits: ['Confident'], score: 5 }
+      } as EDNAResults;
+    }
+    
+    return (
+      <CompleteResultsPage
+        results={mockResults}
+        userEmail="test@example.com"
+        isStandalone={true}
+      />
+    );
+  }
+
   // Signup Route - direct access to registration
   if (window.location.pathname === '/signup') {
     return <SignupPage />;
@@ -193,9 +263,12 @@ export default function App() {
         setIsAuthenticated(true);
         
         // Load quiz results if they exist (non-blocking, silent)
-        loadUserQuizResults(session.user.id).catch(() => {
-          // Fail silently - user can still use the app
-        });
+        // Use email instead of id for loading results
+        if (session.user.email) {
+          loadUserQuizResults(session.user.email).catch(() => {
+            // Fail silently - user can still use the app
+          });
+        }
       } else {
         console.log('ℹ️ No active session found');
       }
@@ -226,17 +299,57 @@ export default function App() {
           if (data.createdAt) {
             const completedDate = new Date(data.createdAt);
             setQuizCompletedAt(completedDate);
-            // Persist to localStorage
+            // Persist to localStorage as backup
             localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+            localStorage.setItem(`quizResults_${userEmail}`, JSON.stringify(data.results));
           }
           console.log('✅ Loaded quiz results from backend for', userEmail);
         }
       } else if (response.status === 404) {
         console.log('ℹ️ No quiz results found for', userEmail);
+        // Check localStorage as fallback
+        const savedResults = localStorage.getItem(`quizResults_${userEmail}`);
+        if (savedResults) {
+          try {
+            const results = JSON.parse(savedResults);
+            if (results && results.core_type) {
+              setQuizResults(results);
+              console.log('✅ Restored quiz results from localStorage');
+            }
+          } catch (e) {
+            console.error('Failed to parse saved results:', e);
+          }
+        }
       }
     } catch (err) {
-      console.log('⚠️ Failed to load quiz results:', err);
-      // Fail silently - user can still take the quiz
+      console.log('⚠️ Failed to load quiz results from backend, checking localStorage:', err);
+      // Backend is down - check localStorage as fallback
+      const savedResults = localStorage.getItem(`quizResults_${userEmail}`);
+      const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
+      
+      if (savedResults) {
+        try {
+          const results = JSON.parse(savedResults);
+          if (results && results.core_type) {
+            setQuizResults(results);
+            console.log('✅ Restored quiz results from localStorage');
+          }
+        } catch (e) {
+          console.error('Failed to parse saved results:', e);
+        }
+      }
+      
+      if (savedQuizCompletedAt) {
+        try {
+          const completedDate = new Date(savedQuizCompletedAt);
+          if (!isNaN(completedDate.getTime())) {
+            setQuizCompletedAt(completedDate);
+            console.log('✅ Restored quiz completion timestamp from localStorage');
+          }
+        } catch (e) {
+          console.error('Failed to parse saved cooldown timestamp:', e);
+        }
+      }
     }
   };
 
@@ -245,52 +358,110 @@ export default function App() {
     setIsAuthenticated(true);
     setShowAuth(false);
     
-    // Clear pending quiz results from localStorage since user is now authenticated
-    localStorage.removeItem('pendingQuizResults');
-    localStorage.removeItem('pendingVerifiedEmail');
     setShowShortResults(false);
     
     // IMPORTANT: Load quiz results FIRST before deciding navigation
     if (userData.email) {
-      await loadUserQuizResults(userData.email);
-    }
-    
-    // After loading results, check quiz cooldown and redirect appropriately
-    // Note: We need to check the results that were just loaded
-    // Since state updates are async, we need to fetch again or use the response
-    try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
-      const response = await fetch(`${BACKEND_URL}/api/quiz/results-by-email?email=${encodeURIComponent(userData.email || '')}`);
+      let hasResults = false;
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.results && data.createdAt) {
-          // User has quiz results, check cooldown
-          const completedAt = new Date(data.createdAt);
-          const daysSinceCompletion = (new Date().getTime() - completedAt.getTime()) / (1000 * 60 * 60 * 24);
-          
-          if (daysSinceCompletion < 7) {
-            // Cooldown active, go to home
-            console.log('✅ User has quiz results with active cooldown, redirecting to home');
-            setCurrentView('home');
-          } else {
-            // Cooldown expired, go to dashboard
-            console.log('✅ User has quiz results, cooldown expired, redirecting to dashboard');
-            setCurrentView('dashboard');
+      // First, migrate any pendingQuizResults to email-keyed storage before clearing
+      const pendingResults = localStorage.getItem('pendingQuizResults');
+      if (pendingResults) {
+        try {
+          const results = JSON.parse(pendingResults);
+          if (results && results.core_type) {
+            localStorage.setItem(`quizResults_${userData.email}`, pendingResults);
+            console.log('✅ Migrated pending results to email-keyed storage');
           }
-        } else {
-          // No quiz results, show onboarding
-          console.log('ℹ️ No quiz results found, showing onboarding');
-          setShowOnboarding(true);
+        } catch (e) {
+          console.error('Failed to migrate pending results:', e);
         }
+      }
+      
+      // Now clear pending results (they're now in email-keyed storage)
+      localStorage.removeItem('pendingQuizResults');
+      localStorage.removeItem('pendingVerifiedEmail');
+      
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/quiz/results-by-email?email=${encodeURIComponent(userData.email)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.results) {
+            // Set results in state
+            setQuizResults(data.results);
+            
+            // Set quiz completion timestamp for cooldown
+            if (data.createdAt) {
+              const completedDate = new Date(data.createdAt);
+              setQuizCompletedAt(completedDate);
+              localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+              // Also save to email-keyed storage as backup
+              localStorage.setItem(`quizResults_${userData.email}`, JSON.stringify(data.results));
+              console.log('✅ Quiz results and cooldown timestamp loaded from backend for', userData.email);
+            }
+            
+            hasResults = true;
+          }
+        } else if (response.status === 404) {
+          console.log('ℹ️ No quiz results found in backend for', userData.email);
+        }
+      } catch (err) {
+        console.error('⚠️ Backend connection failed, checking localStorage for saved state:', err);
+        
+        // Backend is down - check localStorage for saved results and cooldown
+        const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
+        const savedResults = localStorage.getItem(`quizResults_${userData.email}`) || 
+                            localStorage.getItem('pendingQuizResults');
+        
+        if (savedQuizCompletedAt) {
+          try {
+            const completedDate = new Date(savedQuizCompletedAt);
+            if (!isNaN(completedDate.getTime())) {
+              setQuizCompletedAt(completedDate);
+              console.log('✅ Restored quiz completion timestamp from localStorage:', completedDate);
+            }
+          } catch (e) {
+            console.error('Failed to parse saved cooldown timestamp:', e);
+          }
+        }
+        
+        if (savedResults) {
+          try {
+            const results = JSON.parse(savedResults);
+            if (results && results.core_type) {
+              setQuizResults(results);
+              hasResults = true;
+              // Ensure it's saved with email key
+              localStorage.setItem(`quizResults_${userData.email}`, savedResults);
+              console.log('✅ Restored quiz results from localStorage');
+            }
+          } catch (e) {
+            console.error('Failed to parse saved results:', e);
+          }
+        }
+      }
+      
+      // Check if we have cooldown timestamp (either from backend or localStorage restore)
+      const hasCooldown = quizCompletedAt || (() => {
+        const saved = localStorage.getItem('quizCompletedAt');
+        return saved ? new Date(saved) : null;
+      })();
+      
+      // Navigate based on whether we have results or cooldown
+      if (hasResults || hasCooldown) {
+        // User has results or cooldown active - go to dashboard
+        // Dashboard will show results if available, or "Take Quiz" prompt if not
+        console.log('✅ User has quiz results or cooldown, redirecting to dashboard');
+        setCurrentView('dashboard');
       } else {
-        // No quiz results found, show onboarding
-        console.log('ℹ️ No quiz results found, showing onboarding');
+        // No quiz results found - show onboarding
+        console.log('ℹ️ No quiz results found for', userData.email, '- showing onboarding');
         setShowOnboarding(true);
       }
-    } catch (err) {
-      console.error('Error checking quiz results:', err);
-      // On error, show onboarding as fallback
+    } else {
+      // No email - show onboarding
       setShowOnboarding(true);
     }
   };
@@ -337,7 +508,10 @@ export default function App() {
       })();
       
       // Also check if user has quiz results (indicates they completed the quiz)
-      const hasCompletedQuiz = quizResults || localStorage.getItem('pendingQuizResults');
+      // Check multiple localStorage keys for compatibility
+      const hasCompletedQuiz = quizResults || 
+                                localStorage.getItem('pendingQuizResults') ||
+                                (user?.email && localStorage.getItem(`quizResults_${user.email}`));
       
       if (hasCompletedQuiz && checkDate) {
         const daysSinceCompletion = (new Date().getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -347,6 +521,22 @@ export default function App() {
           // Set the timestamp in state if it was only in localStorage
           if (!quizCompletedAt && checkDate) {
             setQuizCompletedAt(checkDate);
+          }
+          // Also restore results from localStorage if not in state
+          if (!quizResults && user?.email) {
+            const savedResults = localStorage.getItem(`quizResults_${user.email}`) || 
+                                 localStorage.getItem('pendingQuizResults');
+            if (savedResults) {
+              try {
+                const results = JSON.parse(savedResults);
+                if (results && results.core_type) {
+                  setQuizResults(results);
+                  console.log('✅ Restored quiz results from localStorage for cooldown check');
+                }
+              } catch (e) {
+                console.error('Failed to parse saved results:', e);
+              }
+            }
           }
           // Continue to setCurrentView below to show cooldown message
         } else {
@@ -370,6 +560,22 @@ export default function App() {
 
   const handleQuizComplete = async (results: EDNAResults) => {
     setQuizResults(results);
+    
+    // Set quiz completion timestamp immediately when quiz is completed
+    const completedDate = new Date();
+    setQuizCompletedAt(completedDate);
+    localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+    
+    // Save results to localStorage immediately (keyed by email if authenticated)
+    if (isAuthenticated && user?.email) {
+      localStorage.setItem(`quizResults_${user.email}`, JSON.stringify(results));
+      console.log('✅ Quiz results saved to localStorage for authenticated user:', user.email);
+    } else {
+      // For unauthenticated users, save as pending
+      localStorage.setItem('pendingQuizResults', JSON.stringify(results));
+    }
+    
+    console.log('✅ Quiz completion timestamp saved:', completedDate);
     
     // If user is already authenticated, skip email verification
     if (isAuthenticated && user?.email) {
@@ -443,9 +649,25 @@ export default function App() {
           // Set quiz completion timestamp for 7-day cooldown
           const completedDate = new Date();
           setQuizCompletedAt(completedDate);
-          // Persist to localStorage
+          // Persist to localStorage as backup
           localStorage.setItem('quizCompletedAt', completedDate.toISOString());
-          console.log('✅ Quiz completion timestamp saved:', completedDate);
+          // Also save results to localStorage as backup (keyed by email)
+          if (quizResults) {
+            localStorage.setItem(`quizResults_${email}`, JSON.stringify(quizResults));
+            // Also keep the pendingQuizResults for compatibility
+            localStorage.setItem('pendingQuizResults', JSON.stringify(quizResults));
+          }
+          console.log('✅ Quiz completion timestamp and results saved to localStorage:', completedDate);
+        } else {
+          // Even if backend save fails, save to localStorage as backup
+          const completedDate = new Date();
+          setQuizCompletedAt(completedDate);
+          localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+          if (quizResults) {
+            localStorage.setItem(`quizResults_${email}`, JSON.stringify(quizResults));
+            localStorage.setItem('pendingQuizResults', JSON.stringify(quizResults));
+          }
+          console.log('⚠️ Backend save failed, but saved to localStorage as backup');
         }
       } catch (error) {
         console.error('Failed to save results:', error);
@@ -509,7 +731,7 @@ export default function App() {
     );
   }
 
-  // Show short results preview if email is verified
+  // Show short results preview if email is verified (as standalone page after quiz completion)
   if (showShortResults && quizResults && verifiedEmail) {
     return (
       <CompleteResultsPage
@@ -517,6 +739,8 @@ export default function App() {
         userEmail={verifiedEmail}
         onGetFullReport={handleGetFullReport}
         onViewChange={handleViewChange}
+        quizCompletedAt={quizCompletedAt}
+        isStandalone={true}
       />
     );
   }
@@ -529,6 +753,7 @@ export default function App() {
         onViewChange={handleViewChange}
         isAuthenticated={isAuthenticated}
         onAuthToggle={handleAuthToggle}
+        isSticky={currentView === 'dashboard'}
       />
       
       {currentView === 'home' && (
@@ -552,7 +777,10 @@ export default function App() {
         })();
         
         // Also check if user has quiz results (indicates they completed the quiz)
-        const hasCompletedQuiz = quizResults || localStorage.getItem('pendingQuizResults');
+        // Check multiple localStorage keys for compatibility
+        const hasCompletedQuiz = quizResults || 
+                                  localStorage.getItem('pendingQuizResults') ||
+                                  (user?.email && localStorage.getItem(`quizResults_${user.email}`));
         
         if (hasCompletedQuiz && checkDate) {
           const daysSinceCompletion = (new Date().getTime() - checkDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -560,6 +788,22 @@ export default function App() {
             // Set the timestamp in state if it was only in localStorage
             if (!quizCompletedAt && checkDate) {
               setQuizCompletedAt(checkDate);
+            }
+            // Also restore results from localStorage if not in state
+            if (!quizResults && user?.email) {
+              const savedResults = localStorage.getItem(`quizResults_${user.email}`) || 
+                                   localStorage.getItem('pendingQuizResults');
+              if (savedResults) {
+                try {
+                  const results = JSON.parse(savedResults);
+                  if (results && results.core_type) {
+                    setQuizResults(results);
+                    console.log('✅ Restored quiz results from localStorage for cooldown display');
+                  }
+                } catch (e) {
+                  console.error('Failed to parse saved results:', e);
+                }
+              }
             }
             return (
               <QuizCooldownMessage 
@@ -593,16 +837,25 @@ export default function App() {
         />
       )}
       
-      {currentView === 'dashboard' && isAuthenticated && quizResults && (
+      {currentView === 'dashboard' && isAuthenticated && (
         <CompleteResultsPage 
-          results={quizResults}
+          results={quizResults || null}
           userEmail={user?.email || ''}
           onViewChange={handleViewChange}
+          quizCompletedAt={quizCompletedAt}
         />
       )}
       
       {currentView === 'chat' && isAuthenticated && (
-        <AIMentorHub />
+        <AIMentorHub onViewChange={handleViewChange} isInDashboard={false} />
+      )}
+      
+      {currentView === 'architect-mentor' && isAuthenticated && (
+        <AIMentorHub onViewChange={handleViewChange} isInDashboard={false} initialMentor="architect" />
+      )}
+      
+      {currentView === 'alchemist-mentor' && isAuthenticated && (
+        <AIMentorHub onViewChange={handleViewChange} isInDashboard={false} initialMentor="alchemist" />
       )}
       
       {currentView === 'insights' && quizResults && (

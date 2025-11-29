@@ -270,73 +270,73 @@ export function EDNAResultsPage({ results, onRetakeQuiz, onViewChange }: EDNARes
           </section>
         </>
       );
-    }
+  }
 
-    return (
+  return (
       <>
-        <header className="border-b border-gray-200 py-4 sticky top-0 bg-white z-50 shadow-sm">
-          <div className="container-bs-desktop flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <img src={brandscalingLogo} alt="Brandscaling" className="h-8 w-auto" />
-              <h3 className={colorScheme.text}>Entrepreneurial DNA</h3>
-            </div>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button variant="outline" size="sm" onClick={() => onViewChange('dashboard')}>
-                Dashboard
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
-            </div>
+      <header className="border-b border-gray-200 py-4 sticky top-0 bg-white z-50 shadow-sm">
+        <div className="container-bs-desktop flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <img src={brandscalingLogo} alt="Brandscaling" className="h-8 w-auto" />
+            <h3 className={colorScheme.text}>Entrepreneurial DNA</h3>
           </div>
-        </header>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button variant="outline" size="sm" onClick={() => onViewChange('dashboard')}>
+              Dashboard
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleShare}>
+              <Share2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-        <section className="hero-section section-padding-bs">
-          <div className="container-bs-desktop">
-            <div className="text-center max-w-4xl mx-auto">
-              <h1 className={`mb-4 ${colorScheme.text}`}>
-                The {getDNATypeName()}
-              </h1>
-              <p className="text-xl text-gray-600 mb-12">
-                {subtypeProfile.hero_subtitle}
-              </p>
+      <section className="hero-section section-padding-bs">
+        <div className="container-bs-desktop">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className={`mb-4 ${colorScheme.text}`}>
+              The {getDNATypeName()}
+            </h1>
+            <p className="text-xl text-gray-600 mb-12">
+              {subtypeProfile.hero_subtitle}
+            </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span>Decision Mastery</span>
+                  <span className={colorScheme.text}>{decisionMastery}%</span>
+                </div>
+                <Progress value={decisionMastery} className="h-3" />
+              </div>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span>Core Level</span>
+                  <span className={colorScheme.text}>{coreLevel}%</span>
+                </div>
+                <Progress value={coreLevel} className="h-3" />
+              </div>
+              {!isBlurred && (
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>Decision Mastery</span>
-                    <span className={colorScheme.text}>{decisionMastery}%</span>
+                    <span>Mirror Pair Awareness</span>
+                    <span className={colorScheme.text}>{mirrorAwareness}%</span>
                   </div>
-                  <Progress value={decisionMastery} className="h-3" />
+                  <Progress value={mirrorAwareness} className="h-3" />
                 </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Core Level</span>
-                    <span className={colorScheme.text}>{coreLevel}%</span>
-                  </div>
-                  <Progress value={coreLevel} className="h-3" />
+              )}
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span>Integration</span>
+                  <span className={colorScheme.text}>{integration}%</span>
                 </div>
-                {!isBlurred && (
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span>Mirror Pair Awareness</span>
-                      <span className={colorScheme.text}>{mirrorAwareness}%</span>
-                    </div>
-                    <Progress value={mirrorAwareness} className="h-3" />
-                  </div>
-                )}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Integration</span>
-                    <span className={colorScheme.text}>{integration}%</span>
-                  </div>
-                  <Progress value={integration} className="h-3" />
-                </div>
+                <Progress value={integration} className="h-3" />
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       </>
     );
   };
@@ -428,27 +428,27 @@ export function EDNAResultsPage({ results, onRetakeQuiz, onViewChange }: EDNARes
           </div>
         </section>
       ) : (
-        <section className="section-padding-bs bg-gray-50">
-          <div className="container-bs-desktop">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Core Identity Box */}
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className={`${colorScheme.primary} text-white p-6`}>
-                  <h3>Core Identity</h3>
-                </div>
-                <div className="p-8">
-                  <h2 className="text-center mb-4">
-                    {getDNATypeName()}
-                  </h2>
-                  <p className="text-center mb-2">Default Decision Loop</p>
-                  {getDecisionLoopVisual()}
-                  <div className="mt-8">
-                    <p className="text-gray-700">
-                      {subtypeProfile.loop_description}
-                    </p>
-                  </div>
+      <section className="section-padding-bs bg-gray-50">
+        <div className="container-bs-desktop">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Core Identity Box */}
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className={`${colorScheme.primary} text-white p-6`}>
+                <h3>Core Identity</h3>
+              </div>
+              <div className="p-8">
+                <h2 className="text-center mb-4">
+                  {getDNATypeName()}
+                </h2>
+                <p className="text-center mb-2">Default Decision Loop</p>
+                {getDecisionLoopVisual()}
+                <div className="mt-8">
+                  <p className="text-gray-700">
+                    {subtypeProfile.loop_description}
+                  </p>
                 </div>
               </div>
+            </div>
 
             {/* Mirror Pair Awareness Box */}
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">

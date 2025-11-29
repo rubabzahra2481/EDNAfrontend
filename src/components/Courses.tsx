@@ -14,7 +14,7 @@ interface CoursesProps {
 
 export function Courses({ onViewChange, isAuthenticated }: CoursesProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="w-full bg-white">
       {/* Hero Section */}
       <section className="section-padding-bs bg-white">
         <div className="container-bs-desktop">
@@ -172,8 +172,7 @@ export function Courses({ onViewChange, isAuthenticated }: CoursesProps) {
           </div>
         </div>
       </section>
-      {/* Footer */}
-      <Footer onViewChange={onViewChange} />
+      {/* Footer removed when in dashboard - sidebar handles navigation */}
     </div>
   );
 }
