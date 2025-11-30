@@ -218,9 +218,12 @@ export default function App() {
         });
         setIsAuthenticated(true);
         
-        // Load quiz results if they exist
+        // Load quiz results if they exist (await to ensure results are loaded)
         if (session.user.email) {
-          await loadUserQuizResults(session.user.email);
+          // Wait for results to load - this is critical for cross-device functionality
+          await loadUserQuizResults(session.user.email).catch((err) => {
+            console.log('⚠️ Failed to load quiz results on auth state change:', err);
+          });
         }
       } else if (event !== 'SIGNED_OUT') {
         // Only clear state if not already handling sign out
@@ -266,10 +269,12 @@ export default function App() {
         });
         setIsAuthenticated(true);
         
-        // Load quiz results if they exist (non-blocking, silent)
+        // Load quiz results if they exist (await to ensure results are loaded)
         // Use email instead of id for loading results
+        // CRITICAL: Wait for results to load for cross-device functionality
         if (session.user.email) {
-          loadUserQuizResults(session.user.email).catch(() => {
+          await loadUserQuizResults(session.user.email).catch((err) => {
+            console.log('⚠️ Failed to load quiz results on session restore:', err);
             // Fail silently - user can still use the app
           });
         }
@@ -290,9 +295,10 @@ export default function App() {
     }
   };
 
-  const loadUserQuizResults = async (userEmail: string) => {
+  const loadUserQuizResults = async (userEmail: string): Promise<boolean> => {
     try {
       const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+      console.log(`🔍 Loading quiz results from backend for: ${userEmail}`);
       const response = await fetch(`${BACKEND_URL}/api/quiz/results-by-email?email=${encodeURIComponent(userEmail)}`);
       
       if (response.ok) {
@@ -306,28 +312,29 @@ export default function App() {
             // Persist to localStorage as backup
             localStorage.setItem('quizCompletedAt', completedDate.toISOString());
             localStorage.setItem(`quizResults_${userEmail}`, JSON.stringify(data.results));
+            console.log('✅ Loaded quiz results from backend for', userEmail, 'Completed at:', completedDate);
+          } else {
+            console.log('⚠️ Results loaded but no createdAt timestamp');
           }
-          console.log('✅ Loaded quiz results from backend for', userEmail);
+          return true; // Successfully loaded from backend
+        } else {
+          console.log('ℹ️ Backend returned success but no results data');
+          return false;
         }
       } else if (response.status === 404) {
-        console.log('ℹ️ No quiz results found for', userEmail);
-        // Check localStorage as fallback
-        const savedResults = localStorage.getItem(`quizResults_${userEmail}`);
-        if (savedResults) {
-          try {
-            const results = JSON.parse(savedResults);
-            if (results && results.core_type) {
-              setQuizResults(results);
-              console.log('✅ Restored quiz results from localStorage');
-            }
-          } catch (e) {
-            console.error('Failed to parse saved results:', e);
-          }
-        }
+        console.log('ℹ️ No quiz results found in backend for', userEmail);
+        // Don't check localStorage here - on new device, we want to rely on backend only
+        // localStorage is only for fallback when backend is down
+        return false;
+      } else {
+        console.error('❌ Backend returned error:', response.status, response.statusText);
+        throw new Error(`Backend error: ${response.status}`);
       }
     } catch (err) {
-      console.log('⚠️ Failed to load quiz results from backend, checking localStorage:', err);
-      // Backend is down - check localStorage as fallback
+      console.error('⚠️ Failed to load quiz results from backend:', err);
+      // Only check localStorage if backend is completely down (network error)
+      // On a new device, we should NOT rely on localStorage - it will be empty
+      // This fallback is only for when backend is temporarily unavailable
       const savedResults = localStorage.getItem(`quizResults_${userEmail}`);
       const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
       
@@ -336,24 +343,27 @@ export default function App() {
           const results = JSON.parse(savedResults);
           if (results && results.core_type) {
             setQuizResults(results);
-            console.log('✅ Restored quiz results from localStorage');
+            console.log('✅ Restored quiz results from localStorage (backend unavailable)');
+            
+            if (savedQuizCompletedAt) {
+              try {
+                const completedDate = new Date(savedQuizCompletedAt);
+                if (!isNaN(completedDate.getTime())) {
+                  setQuizCompletedAt(completedDate);
+                  console.log('✅ Restored quiz completion timestamp from localStorage');
+                }
+              } catch (e) {
+                console.error('Failed to parse saved cooldown timestamp:', e);
+              }
+            }
+            return true;
           }
         } catch (e) {
           console.error('Failed to parse saved results:', e);
         }
       }
       
-      if (savedQuizCompletedAt) {
-        try {
-          const completedDate = new Date(savedQuizCompletedAt);
-          if (!isNaN(completedDate.getTime())) {
-            setQuizCompletedAt(completedDate);
-            console.log('✅ Restored quiz completion timestamp from localStorage');
-          }
-        } catch (e) {
-          console.error('Failed to parse saved cooldown timestamp:', e);
-        }
-      }
+      return false; // No results found
     }
   };
 
@@ -387,32 +397,53 @@ export default function App() {
       localStorage.removeItem('pendingQuizResults');
       localStorage.removeItem('pendingVerifiedEmail');
       
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/quiz/results-by-email?email=${encodeURIComponent(userData.email)}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.results) {
-            // Set results in state
-            setQuizResults(data.results);
-            
-            // Set quiz completion timestamp for cooldown
-            if (data.createdAt) {
-              const completedDate = new Date(data.createdAt);
-              setQuizCompletedAt(completedDate);
-              localStorage.setItem('quizCompletedAt', completedDate.toISOString());
-              // Also save to email-keyed storage as backup
-              localStorage.setItem(`quizResults_${userData.email}`, JSON.stringify(data.results));
-              console.log('✅ Quiz results and cooldown timestamp loaded from backend for', userData.email);
+      // Use the centralized loadUserQuizResults function for consistency
+      const resultsLoaded = await loadUserQuizResults(userData.email);
+      hasResults = resultsLoaded;
+      
+      // Wait a moment for state to update
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Double-check state after loading
+      if (!hasResults) {
+        // Check if results were loaded but state hasn't updated yet
+        const emailKeyed = localStorage.getItem(`quizResults_${userData.email}`);
+        if (emailKeyed) {
+          try {
+            const results = JSON.parse(emailKeyed);
+            if (results && results.core_type) {
+              hasResults = true;
+              console.log('✅ Found results in localStorage after backend load');
             }
-            
-            hasResults = true;
+          } catch (e) {
+            // Ignore parse errors
           }
-        } else if (response.status === 404) {
-          console.log('ℹ️ No quiz results found in backend for', userData.email);
         }
-      } catch (err) {
-        console.error('⚠️ Backend connection failed, checking localStorage for saved state:', err);
+      }
+      
+      // Fallback to direct fetch if loadUserQuizResults didn't work (shouldn't happen)
+      if (!hasResults) {
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/quiz/results-by-email?email=${encodeURIComponent(userData.email)}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.results) {
+              setQuizResults(data.results);
+              if (data.createdAt) {
+                const completedDate = new Date(data.createdAt);
+                setQuizCompletedAt(completedDate);
+                localStorage.setItem('quizCompletedAt', completedDate.toISOString());
+                localStorage.setItem(`quizResults_${userData.email}`, JSON.stringify(data.results));
+                console.log('✅ Quiz results loaded via direct fetch for', userData.email);
+              }
+              hasResults = true;
+            }
+          } else if (response.status === 404) {
+            console.log('ℹ️ No quiz results found in backend for', userData.email);
+          }
+        } catch (err) {
+          console.error('⚠️ Backend connection failed, checking localStorage for saved state:', err);
         
         // Backend is down - check localStorage for saved results and cooldown
         const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
@@ -447,14 +478,31 @@ export default function App() {
         }
       }
       
-      // Check if we have cooldown timestamp (either from backend or localStorage restore)
-      const hasCooldown = quizCompletedAt || (() => {
+      // IMPORTANT: Wait a moment for state to update after loading results
+      // This ensures quizResults and quizCompletedAt are set before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Re-check state after loading (state updates are async)
+      const finalResults = quizResults || (() => {
+        // Check if results were just loaded but state hasn't updated yet
+        const emailKeyed = localStorage.getItem(`quizResults_${userData.email}`);
+        if (emailKeyed) {
+          try {
+            return JSON.parse(emailKeyed);
+          } catch (e) {
+            return null;
+          }
+        }
+        return null;
+      })();
+      
+      const finalCooldown = quizCompletedAt || (() => {
         const saved = localStorage.getItem('quizCompletedAt');
         return saved ? new Date(saved) : null;
       })();
       
       // Navigate based on whether we have results or cooldown
-      if (hasResults || hasCooldown) {
+      if (hasResults || finalResults || finalCooldown) {
         // User has results or cooldown active - go to dashboard
         // Dashboard will show results if available, or "Take Quiz" prompt if not
         console.log('✅ User has quiz results or cooldown, redirecting to dashboard');
