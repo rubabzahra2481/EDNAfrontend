@@ -9,20 +9,74 @@ export function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Check if we have a valid session with recovery token
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // Handle Supabase auth hash fragments (access_token, etc.)
+    const handleAuthHash = async () => {
+      // Check if there's a hash fragment with auth tokens or errors
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get('error');
+        const errorDescription = hashParams.get('error_description');
+        const errorCode = hashParams.get('error_code');
+        
+        // Handle errors from hash fragment
+        if (error) {
+          console.error('Auth error from hash:', { error, errorDescription, errorCode });
+          
+          if (errorCode === 'otp_expired' || errorDescription?.includes('expired')) {
+            setError('This password reset link has expired. Please request a new password reset link from the login page.');
+          } else if (error === 'access_denied') {
+            setError('Access denied. The reset link may be invalid or expired. Please request a new one from the login page.');
+          } else {
+            setError(errorDescription || 'Invalid reset link. Please request a new one from the login page.');
+          }
+          
+          // Clear the hash fragment to clean up the URL
+          window.history.replaceState(null, '', window.location.pathname);
+          // Don't return - let the page render with the error message
+        }
+        
+        // If we have an access_token, Supabase will process it automatically
+        // Wait a moment for Supabase to process the hash fragment and create a session
+        const hasAccessToken = hashParams.get('access_token') || hashParams.get('type') === 'recovery';
+        
+        if (hasAccessToken) {
+          // Wait for Supabase to process the hash fragment (it does this automatically)
+          // Give it time to exchange the token for a session
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Clear the hash fragment after processing
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+      
+      // Check if we have a valid session with recovery token
+      // Wait a bit more to ensure Supabase has processed the hash
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        setError('Failed to verify reset link. Please request a new one.');
+        return;
+      }
       
       if (!session) {
-        // No session - redirect to login
-        setError('Invalid or expired reset link. Please request a new one.');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 3000);
+        // No session after processing hash - link is invalid/expired
+        // But don't show error immediately if we just processed a hash
+        // Give it one more try
+        setTimeout(async () => {
+          const { data: { session: retrySession } } = await supabase.auth.getSession();
+          if (!retrySession) {
+            setError('Invalid or expired reset link. Please request a new password reset link from the login page.');
+          }
+        }, 1000);
+      } else {
+        console.log('✅ Valid session found for password reset');
       }
     };
 
-    checkSession();
+    handleAuthHash();
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {

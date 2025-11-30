@@ -115,7 +115,11 @@ export default function App() {
   }
 
   // Reset Password Route - for password reset flow
-  if (window.location.pathname === '/reset-password') {
+  // Check pathname (Supabase uses hash fragments for auth tokens, but pathname should be /reset-password)
+  const isResetPasswordRoute = window.location.pathname === '/reset-password' || 
+                                window.location.pathname === '/reset-password/';
+  
+  if (isResetPasswordRoute) {
     return <ResetPasswordPage />;
   }
 
