@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-DNA Results Test Page</title>
+    <script type="module">
+        // Import React and ReactDOM from CDN
+        import React from 'https://esm.sh/react@18.2.0';
+        import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+        
+        // Mock results for testing
+        const alchemistResults = {
+            core_type: 'alchemist',
+            core_type_mastery: 85,
+            subtype: ['visionary'],
+            mirror_awareness_score: 75,
+            learning_style: {
+                dominant_modality: 'Visual',
+                approach: 'Sequential',
+                concept_processing: 'Abstract',
+                working_environment: 'Individual',
+                pace: 'Flexible'
+            },
+            neurodiversity: {
+                adhd_score: 6,
+                autism_score: 2,
+                classification: 'Neurodivergent'
+            },
+            mindset: 'Growth Mindset',
+            personality: 'Confidently Patient',
+            meta_beliefs: {
+                mission_driven: true,
+                meaning_led: true
+            }
+        };
+
+        const architectResults = {
+            core_type: 'architect',
+            core_type_mastery: 90,
+            subtype: ['strategist'],
+            mirror_awareness_score: 80,
+            learning_style: {
+                dominant_modality: 'Kinesthetic',
+                approach: 'Sequential',
+                concept_processing: 'Concrete',
+                working_environment: 'Collaborative',
+                pace: 'Flexible'
+            },
+            neurodiversity: {
+                adhd_score: 2,
+                autism_score: 6,
+                classification: 'Neurodivergent'
+            },
+            mindset: 'Growth Mindset',
+            personality: 'Confidently Patient',
+            meta_beliefs: {
+                mission_driven: true,
+                meaning_led: true
+            }
+        };
+
+        const mixedResults = {
+            core_type: 'blurred',
+            core_type_mastery: 45,
+            subtype: ['mixed'],
+            mirror_awareness_score: 50,
+            learning_style: {
+                dominant_modality: 'Visual',
+                approach: 'Sequential',
+                concept_processing: 'Abstract',
+                working_environment: 'Individual',
+                pace: 'Flexible'
+            },
+            neurodiversity: {
+                adhd_score: 4,
+                autism_score: 4,
+                classification: 'Neurodivergent'
+            },
+            mindset: 'Growth Mindset',
+            personality: 'Confidently Patient',
+            meta_beliefs: {
+                mission_driven: true,
+                meaning_led: true
+            }
+        };
+
+        // Store test results and navigate
+        function loadTestResults(type) {
+            let results;
+            switch(type) {
+                case 'alchemist':
+                    results = alchemistResults;
+                    break;
+                case 'architect':
+                    results = architectResults;
+                    break;
+                case 'mixed':
+                    results = mixedResults;
+                    break;
+            }
+            
+            localStorage.setItem('pendingQuizResults', JSON.stringify(results));
+            localStorage.setItem('pendingVerifiedEmail', 'test@example.com');
+            
+            // Navigate to main app
+            window.location.href = '/';
+        }
+
+        // Make function available globally
+        window.loadTestResults = loadTestResults;
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        .alchemist-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .architect-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .mixed-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 E-DNA Results Test Page</h1>
+        <p>Click a button below to load test results for each E-DNA type and view the result pages.</p>
+        
+        <div class="button-group">
+            <button class="alchemist-btn" onclick="loadTestResults('alchemist')">
+                ✨ View Alchemist Results
+            </button>
+            <button class="architect-btn" onclick="loadTestResults('architect')">
+                🏗️ View Architect Results
+            </button>
+            <button class="mixed-btn" onclick="loadTestResults('mixed')">
+                🔀 View Mixed Results
+            </button>
+        </div>
+
+        <div class="info">
+            <h3>📋 Testing Instructions</h3>
+            <p><strong>What this does:</strong> Each button loads mock quiz results into localStorage and redirects to the main app to display the corresponding result page.</p>
+            <p><strong>What to check:</strong></p>
+            <ul>
+                <li>All sections display correctly (Core Identity, Learning Style, Neurodiversity, Mindset & Personality, Meta-Beliefs & Values)</li>
+                <li>Progress bars show correct percentages</li>
+                <li>Color gradients match the Figma designs</li>
+                <li>Buttons (Share, Download PDF, Retake) work properly</li>
+                <li>Content is appropriate for each type (Alchemist vs Architect vs Mixed)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
