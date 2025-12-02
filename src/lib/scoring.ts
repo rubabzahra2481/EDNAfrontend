@@ -269,8 +269,8 @@ export function calculateLayer3(answers: UserAnswers): Layer3Result {
         const dimensionName = question.dimension;
 
         dimensions[dimensionName] = { score, label };
-        totalScore += score;
-      }
+    totalScore += score;
+  }
     }
   });
 
@@ -310,8 +310,8 @@ export function calculateLayer4(answers: UserAnswers): Layer4Result {
             const scoreKey = scoreMapping[selectedOption.score];
             if (scoreKey) {
               scores[scoreKey]++;
-            }
-          }
+    }
+  }
         }
       }
     }

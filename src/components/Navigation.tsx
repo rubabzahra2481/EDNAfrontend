@@ -131,16 +131,53 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
             {currentView === 'home' && !isAuthenticated && navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
+              // Disable Dashboard button on mobile
+              const isDashboard = item.id === 'dashboard';
               return (
                 <button
                   key={item.id}
                   onClick={() => {
+                    if (isDashboard) {
+                      return; // Prevent navigation to dashboard on mobile
+                    }
                     onViewChange(item.id);
                     setIsMobileMenuOpen(false);
                   }}
+                  disabled={isDashboard}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
                     isActive
                       ? 'bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] text-white'
+                      : isDashboard
+                      ? 'text-gray-400 cursor-not-allowed opacity-50'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="typo-body-bs font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+            {/* Show authenticated menu items but disable Dashboard */}
+            {isAuthenticated && navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              const isDashboard = item.id === 'dashboard';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (isDashboard) {
+                      return; // Prevent navigation to dashboard on mobile
+                    }
+                    onViewChange(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  disabled={isDashboard}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] text-white'
+                      : isDashboard
+                      ? 'text-gray-400 cursor-not-allowed opacity-50'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >

@@ -35,6 +35,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     <aside
       className="fixed left-0 flex flex-col hide-scrollbar"
       style={{ 
+        position: 'fixed', // Fixed positioning to stay connected to navbar
         top: '70px', // Start directly below navbar (64px nav + 6px gradient stripe)
         left: '0px', // Explicitly set left position
         width: isSidebarCollapsed ? '72px' : '260px',
@@ -55,8 +56,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         backfaceVisibility: 'hidden', // Prevent flickering
         WebkitTransform: 'translateZ(0)', // Safari GPU acceleration
         WebkitBackfaceVisibility: 'hidden', // Safari prevent flickering
-        position: 'fixed', // Fixed positioning to stay connected to navbar
-        zIndex: 40 // Below navbar (z-50) but above content
+        zIndex: 40, // Below navbar (z-50) but above content
+        marginTop: '0px', // Ensure no margin offset
+        marginLeft: '0px', // Ensure no margin offset
+        marginRight: '0px', // Ensure no margin offset
+        marginBottom: '0px' // Ensure no margin offset
       }}
     >
       {/* Sidebar Header - Ultra Minimal */}
@@ -88,7 +92,13 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           }} 
         />
         <button
-          onClick={() => {
+          onClick={(e) => {
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (isMobile) {
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
             // Small delay to ensure transition is applied in both directions
             const newState = !isSidebarCollapsed;
             requestAnimationFrame(() => {
@@ -97,15 +107,21 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               });
             });
           }}
-          className="p-1.5 rounded-md transition-all duration-200 flex-shrink-0 hover:bg-gray-100"
+          className="p-1.5 rounded-md transition-all duration-200 flex-shrink-0 hover:bg-gray-100 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
           style={{ 
             color: '#6b7280'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#374151';
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (!isMobile) {
+              e.currentTarget.style.color = '#374151';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#6b7280';
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (!isMobile) {
+              e.currentTarget.style.color = '#6b7280';
+            }
           }}
           aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -197,7 +213,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         );
       case 'chat':
         return (
-          <div className="w-full h-full overflow-hidden bg-gray-50" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="w-full h-full overflow-y-auto bg-gray-50" style={{ display: 'flex', flexDirection: 'column' }}>
             <AIMentorHub onViewChange={onViewChange} isInDashboard={true} />
           </div>
         );
@@ -212,15 +228,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           // No results - show "Take Quiz" prompt
           // Cooldown check is handled in App.tsx when clicking the quiz button
           return (
-            <div className="max-w-4xl mx-auto w-full bg-gray-50">
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-12 text-center shadow-lg">
+            <div className="max-w-4xl mx-auto w-full bg-gray-50 px-4 sm:px-6">
+              <div className="bg-white border-2 border-gray-200 rounded-xl p-6 sm:p-8 md:p-12 text-center shadow-lg">
                 <div className="mb-6">
-                  <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4" style={{
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-4" style={{
                     background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)'
                   }}>
-                    <Brain className="w-12 h-12 text-white" />
+                    <Brain className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4" style={{
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{
                     backgroundImage: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -228,20 +244,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   }}>
                     No E-DNA Profile Yet
                   </h2>
-                  <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
                     Complete the E-DNA assessment to unlock your personalized profile, insights, and recommendations.
                   </p>
                   <button
                     onClick={() => {
                       onViewChange?.('quiz');
                     }}
-                    className="px-8 py-3 rounded-lg text-white font-semibold text-lg transition-all hover:opacity-90 shadow-lg"
-                    style={{
-                      background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)',
-                      borderRadius: '5%'
-                    }}
+                    className="cta-gradient-bs px-8 inline-flex items-center gap-2"
                   >
-                    Take E-DNA Quiz
+                    <span>Take E-DNA Quiz</span>
                   </button>
                 </div>
               </div>
@@ -252,8 +264,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         return null;
       default:
         return (
-          <div className="max-w-4xl mx-auto w-full text-center py-12">
-            <p className="text-gray-600">Select a view from the sidebar</p>
+          <div className="max-w-4xl mx-auto w-full text-center py-8 sm:py-12 px-4">
+            <p className="text-gray-600 text-sm sm:text-base">Select a view from the sidebar</p>
           </div>
         );
     }
@@ -265,7 +277,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       // Standalone mode: show empty state without sidebar
       return (
         <div className="min-h-screen bg-white" style={{ fontFamily: 'Inter, sans-serif' }}>
-          <div className="max-w-4xl mx-auto w-full bg-gray-50 p-12">
+          <div className="max-w-4xl mx-auto w-full bg-gray-50 p-4 sm:p-6 md:p-12">
             {renderContent()}
           </div>
         </div>
@@ -276,10 +288,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         className="bg-gray-50" 
         style={{ 
           fontFamily: 'Inter, sans-serif',
-          height: '100vh',
+          height: 'calc(100vh - 70px)',
           overflow: 'hidden',
           position: 'fixed',
-          top: 0,
+          top: '70px', // Start below navbar
           left: 0,
           right: 0,
           bottom: 0,
@@ -289,17 +301,17 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         {/* COLLAPSIBLE SIDEBAR */}
         <Sidebar />
 
+
         {/* MAIN CONTENT AREA */}
         <div 
-          className="flex flex-col bg-gray-50"
+          className={`flex flex-col bg-gray-50 md:ml-[260px] ${isSidebarCollapsed ? 'md:ml-[72px]' : ''}`}
           style={{ 
-            marginLeft: isSidebarCollapsed ? '72px' : '260px',
             marginTop: '70px', // Account for topbar height (64px nav + 6px gradient)
-            padding: activeView === 'profile' ? '40px' : '0',
+            padding: activeView === 'profile' ? '20px 16px' : '0',
             height: 'calc(100vh - 70px)',
             overflow: activeView === 'profile' ? 'auto' : 'hidden', // Allow scroll for profile view
-            transition: 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            willChange: 'margin-left',
+            transition: 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 300ms ease',
+            willChange: 'margin-left, padding',
             transform: 'translateZ(0)', // Force GPU acceleration
             backfaceVisibility: 'hidden', // Prevent flickering
             WebkitTransform: 'translateZ(0)', // Safari GPU acceleration
@@ -779,7 +791,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           style={{ 
             marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
             marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
-            padding: isStandalone ? '0' : (activeView === 'profile' ? '40px' : '0'),
+            padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
             height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
             transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -804,8 +816,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={() => onViewChange?.('dashboard')}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2"
+                        onClick={(e) => {
+                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                          if (isMobile) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                          }
+                          onViewChange?.('dashboard');
+                        }}
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -842,11 +862,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               )}
 
               {/* MAIN CONTENT */}
-              <div ref={pdfContentRef} data-pdf-content className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+              <div ref={pdfContentRef} data-pdf-content className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
-              className="text-[32px] font-semibold mb-2"
+              className="text-2xl sm:text-3xl md:text-[32px] font-semibold mb-2"
               style={{
                 backgroundImage: 'linear-gradient(to right, #42047d, #f6782f)',
                 WebkitBackgroundClip: 'text',
@@ -857,7 +877,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               The Alchemist
             </h1>
             <p 
-              className="text-[10px] font-semibold mx-auto max-w-md"
+              className="text-[9px] sm:text-[10px] font-semibold mx-auto max-w-md px-2"
               style={{
                 color: '#f6782f'
               }}
@@ -872,7 +892,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span 
-                  className="text-[10px] font-semibold"
+                  className="text-[9px] sm:text-[10px] font-semibold"
                   style={{
                     color: '#f6782f'
                   }}
@@ -880,7 +900,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   Decision Mastery
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-semibold text-gray-800">Core Level</span>
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-gray-800">Core Level</span>
                   <div 
                     className="w-[5px] h-[5px] rounded-full"
                     style={{
@@ -888,7 +908,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   ></div>
                   <span 
-                    className="text-[10px] font-semibold"
+                    className="text-[9px] sm:text-[10px] font-semibold"
                     style={{
                       color: '#000000'
                     }}
@@ -912,7 +932,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span 
-                  className="text-[10px] font-semibold"
+                  className="text-[9px] sm:text-[10px] font-semibold"
                   style={{
                     color: '#f6782f'
                   }}
@@ -920,7 +940,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   Mirror Pair Awareness
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-semibold text-gray-800">Integration</span>
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-gray-800">Integration</span>
                   <div 
                     className="w-[5px] h-[5px] rounded-full"
                     style={{
@@ -928,7 +948,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   ></div>
                   <span 
-                    className="text-[10px] font-semibold"
+                    className="text-[9px] sm:text-[10px] font-semibold"
                     style={{
                       color: '#000000'
                     }}
@@ -966,42 +986,45 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               
               <div className="mb-4">
                 <p className="text-[12px] font-semibold text-black mb-2">Default Decision Loop</p>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-2 mb-2">
                   <div 
-                    className="px-4 py-2 flex items-center justify-center"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Emotion</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Emotion</p>
                   </div>
-                  <span className="text-black">→</span>
+                  <span className="text-black rotate-90 sm:rotate-0">→</span>
                   <div 
-                    className="px-4 py-2 flex items-center justify-center"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Logic</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Logic</p>
                   </div>
-                  <span className="text-black">→</span>
+                  <span className="text-black rotate-90 sm:rotate-0">→</span>
                   <div 
-                    className="px-4 py-2 flex items-center justify-center relative"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center relative min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Emotion</p>
-                    <p className="text-black absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap" style={{ top: '28px', fontSize: '13px' }}>End-validator</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Emotion</p>
+                    <p className="text-black absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-[13px]" style={{ top: '100%', marginTop: '4px' }}>End-validator</p>
                   </div>
                 </div>
-                <p className="text-[10px] font-medium text-black text-center" style={{ marginTop: '24.5px' }}>Emotion overrides and validates your decisions.</p>
+                <p className="text-[9px] sm:text-[10px] font-medium text-black text-center mt-6 sm:mt-0" style={{ marginTop: '24.5px' }}>Emotion overrides and validates your decisions.</p>
               </div>
 
               <div>
@@ -1050,7 +1073,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                       >
                         {subtypeInfo.fullName}
                       </h4>
-                      <p className="text-[10px] font-normal text-black mb-3 text-center">{subtypeInfo.description}</p>
+                      <p className="text-[9px] sm:text-[10px] font-normal text-black mb-3 text-center">{subtypeInfo.description}</p>
                       
                       <div className="mb-3">
                         <p 
@@ -1061,7 +1084,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                         >
                           Strength
                         </p>
-                        <p className="text-[10px] font-normal text-black text-center">{subtypeInfo.strength}</p>
+                        <p className="text-[9px] sm:text-[10px] font-normal text-black text-center">{subtypeInfo.strength}</p>
                       </div>
                       
                       <div>
@@ -1073,7 +1096,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                         >
                           Blind Spot
                         </p>
-                        <p className="text-[10px] font-normal text-black text-center">{subtypeInfo.blindSpot}</p>
+                        <p className="text-[9px] sm:text-[10px] font-normal text-black text-center">{subtypeInfo.blindSpot}</p>
                       </div>
                     </>
                   );
@@ -1117,24 +1140,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold" style={{ color: '#000000' }}>Learning Style Preferences</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap justify-center items-stretch" 
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4"
               >
                 {/* Modality Preference */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1152,11 +1166,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Approach */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1174,11 +1186,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Concept Processing */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1196,11 +1206,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Working Environment */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1218,11 +1226,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Pace */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1284,25 +1290,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold" style={{ color: '#000000' }}>Mindset and Personality</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap gap-3"
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center'
-                }}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
               >
                 {/* Mindset */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1343,13 +1339,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Personality */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1372,13 +1364,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Communication */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1412,14 +1400,12 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold" style={{ color: '#000000' }}>Meta-Beliefs and Values</p>
             </div>
-            <div className="p-4 overflow-x-auto">
-              <div className="flex flex-row flex-nowrap gap-3 mb-4" style={{ display: 'flex', flexWrap: 'nowrap' }}>
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Faith Orientation</p>
@@ -1436,11 +1422,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Control Orientation</p>
@@ -1457,11 +1441,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Fairness View</p>
@@ -1478,11 +1460,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Integrity Style</p>
@@ -1499,11 +1479,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Growth Preference</p>
@@ -1520,11 +1498,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Impact Preference</p>
@@ -1616,7 +1592,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           style={{ 
             marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
             marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
-            padding: isStandalone ? '0' : (activeView === 'profile' ? '40px' : '0'),
+            padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
             height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
             transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -1641,8 +1617,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={() => onViewChange?.('dashboard')}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2"
+                        onClick={(e) => {
+                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                          if (isMobile) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                          }
+                          onViewChange?.('dashboard');
+                        }}
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -1679,7 +1663,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               )}
 
               {/* MAIN CONTENT */}
-              <div ref={pdfContentRef} data-pdf-content className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+              <div ref={pdfContentRef} data-pdf-content className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
@@ -1725,7 +1709,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   ></div>
                   <span 
-                    className="text-[10px] font-semibold"
+                    className="text-[9px] sm:text-[10px] font-semibold"
                     style={{
                       color: '#000000'
                     }}
@@ -1765,7 +1749,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   ></div>
                   <span 
-                    className="text-[10px] font-semibold"
+                    className="text-[9px] sm:text-[10px] font-semibold"
                     style={{
                       color: '#000000'
                     }}
@@ -1803,42 +1787,45 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               
               <div className="mb-4">
                 <p className="text-[12px] font-semibold text-black mb-2">Default Decision Loop</p>
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-2 mb-2">
                   <div 
-                    className="px-4 py-2 flex items-center justify-center"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Logic</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Logic</p>
                   </div>
-                  <span className="text-black">→</span>
+                  <span className="text-black rotate-90 sm:rotate-0">→</span>
                   <div 
-                    className="px-4 py-2 flex items-center justify-center"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Emotion</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Emotion</p>
                   </div>
-                  <span className="text-black">→</span>
+                  <span className="text-black rotate-90 sm:rotate-0">→</span>
                   <div 
-                    className="px-4 py-2 flex items-center justify-center relative"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-center relative min-w-[80px] sm:min-w-[100px]"
                     style={{
                       background: 'linear-gradient(to right, #42047d, #f6782f)',
-                      height: '24px',
+                      height: 'auto',
+                      minHeight: '24px',
                       borderRadius: '5%'
                     }}
                   >
-                    <p className="text-[10px] font-semibold text-white">Logic</p>
-                    <p className="text-black absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap" style={{ top: '28px', fontSize: '13px' }}>End-validator</p>
+                    <p className="text-[9px] sm:text-[10px] font-semibold text-white">Logic</p>
+                    <p className="text-black absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap text-[10px] sm:text-[13px]" style={{ top: '100%', marginTop: '4px' }}>End-validator</p>
                   </div>
                 </div>
-                <p className="text-[10px] font-medium text-black text-center" style={{ marginTop: '24.5px' }}>Logic overrides and validates your decisions.</p>
+                <p className="text-[9px] sm:text-[10px] font-medium text-black text-center mt-6 sm:mt-0" style={{ marginTop: '24.5px' }}>Logic overrides and validates your decisions.</p>
               </div>
 
               <div>
@@ -1876,7 +1863,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                       >
                         {subtypeName}
                       </h4>
-                      <p className="text-[10px] font-normal text-black mb-3 text-center">{subtypeInfo.description}</p>
+                      <p className="text-[9px] sm:text-[10px] font-normal text-black mb-3 text-center">{subtypeInfo.description}</p>
                       
                       <div className="mb-3">
                         <p 
@@ -1887,7 +1874,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                         >
                           Strength
                         </p>
-                        <p className="text-[10px] font-normal text-black text-center">{subtypeInfo.strength}</p>
+                        <p className="text-[9px] sm:text-[10px] font-normal text-black text-center">{subtypeInfo.strength}</p>
                       </div>
                       
                       <div>
@@ -1899,7 +1886,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                         >
                           Blind Spot
                         </p>
-                        <p className="text-[10px] font-normal text-black text-center">{subtypeInfo.blindSpot}</p>
+                        <p className="text-[9px] sm:text-[10px] font-normal text-black text-center">{subtypeInfo.blindSpot}</p>
                       </div>
                     </>
                   );
@@ -1943,24 +1930,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Learning Style Preferences</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap justify-center items-stretch" 
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4"
               >
                 {/* Modality Preference */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -1978,11 +1956,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Approach */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2000,11 +1976,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Concept Processing */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2022,11 +1996,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Working Environment */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2044,11 +2016,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Pace */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2110,25 +2080,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Mindset and Personality</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap gap-3"
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center'
-                }}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
               >
                 {/* Mindset */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2169,13 +2129,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Personality */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2198,13 +2154,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Communication */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2238,14 +2190,12 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Meta-Beliefs and Values</p>
             </div>
-            <div className="p-4 overflow-x-auto">
-              <div className="flex flex-row flex-nowrap gap-3 mb-4" style={{ display: 'flex', flexWrap: 'nowrap' }}>
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Faith Orientation</p>
@@ -2262,11 +2212,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Control Orientation</p>
@@ -2283,11 +2231,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Fairness View</p>
@@ -2304,11 +2250,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Integrity Style</p>
@@ -2325,11 +2269,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Growth Preference</p>
@@ -2346,11 +2288,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Impact Preference</p>
@@ -2443,7 +2383,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           style={{ 
             marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
             marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
-            padding: isStandalone ? '0' : (activeView === 'profile' ? '40px' : '0'),
+            padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
             height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
             transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -2468,8 +2408,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={() => onViewChange?.('dashboard')}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2"
+                        onClick={(e) => {
+                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                          if (isMobile) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                          }
+                          onViewChange?.('dashboard');
+                        }}
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -2506,7 +2454,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               )}
 
               {/* MAIN CONTENT */}
-              <div ref={pdfContentRef} data-pdf-content className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+              <div ref={pdfContentRef} data-pdf-content className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* TITLE SECTION */}
           <div className="text-center mb-6">
             <h1 
@@ -2679,24 +2627,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Learning Style Preferences</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap justify-center items-stretch" 
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4"
               >
                 {/* Modality Preference */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2717,11 +2656,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Approach */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2742,11 +2679,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Concept Processing */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2767,11 +2702,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Working Environment */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2792,11 +2725,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Pace */}
                 <div 
-                  className="bg-white border border-[#42047d] py-3 px-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] py-3 px-2 sm:px-3 flex flex-col"
                   style={{ 
-                    width: '140px', 
                     borderRadius: '5%',
-                    minWidth: '140px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2864,25 +2795,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Mindset and Personality</p>
             </div>
-            <div className="p-4 overflow-x-auto">
+            <div className="p-3 sm:p-4">
               <div 
-                className="flex flex-row flex-nowrap gap-3"
-                style={{ 
-                  display: 'flex', 
-                  flexWrap: 'nowrap',
-                  alignItems: 'stretch',
-                  justifyContent: 'center'
-                }}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
               >
                 {/* Mindset */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2932,13 +2853,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Personality */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -2964,13 +2881,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
                 {/* Communication */}
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 flex flex-col"
+                  className="bg-white border border-[#42047d] p-3 flex flex-col"
                   style={{ 
                     borderRadius: '5%',
-                    width: '220px',
-                    minWidth: '220px',
-                    maxWidth: '220px',
-                    height: '100%',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
@@ -3007,14 +2920,12 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             >
               <p className="text-[14px] font-bold text-white">Meta-Beliefs and Values</p>
             </div>
-            <div className="p-4 overflow-x-auto">
-              <div className="flex flex-row flex-nowrap gap-3 mb-4" style={{ display: 'flex', flexWrap: 'nowrap' }}>
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Faith Orientation</p>
@@ -3034,11 +2945,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Control Orientation</p>
@@ -3058,11 +2967,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Fairness View</p>
@@ -3082,11 +2989,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Integrity Style</p>
@@ -3106,11 +3011,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Growth Preference</p>
@@ -3130,11 +3033,9 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   </p>
                 </div>
                 <div 
-                  className="bg-white border border-[#42047d] p-3 flex-shrink-0 text-center"
+                  className="bg-white border border-[#42047d] p-2 sm:p-3 text-center"
                   style={{ 
-                    borderRadius: '5%',
-                    minWidth: '120px',
-                    flex: '1 1 auto'
+                    borderRadius: '5%'
                   }}
                 >
                   <p className="text-[8px] font-bold text-black mb-1">Impact Preference</p>
@@ -3224,8 +3125,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           </div>
           <div className="flex items-center space-x-6">
             <button 
-              onClick={() => onViewChange?.('dashboard')}
-              className="text-sm font-semibold flex items-center space-x-2 hover:text-purple-600 transition-colors"
+              onClick={(e) => {
+                const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                if (isMobile) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                onViewChange?.('dashboard');
+              }}
+              className="text-sm font-semibold flex items-center space-x-2 hover:text-purple-600 transition-colors md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
             >
               <span>🏠</span>
               <span>Dashboard</span>

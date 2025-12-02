@@ -304,6 +304,26 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </div>
           </div>
 
+          {/* Assessment Purpose - GitHub style callout */}
+          <div className="border-l-4 border-[var(--bs-color-indigo)] bg-blue-50 rounded-r-xl p-8">
+            <div className="flex items-start gap-6">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h4 className="typo-h3-bs text-gray-900 mb-3">
+                  This assessment is designed to reveal your real mental wiring
+                </h4>
+                <p className="typo-body-bs text-gray-700 mb-3">
+                  Not who you think you "should" be, not who others expect you to be, but who you truly are when making decisions that matter.
+                </p>
+                <p className="typo-body-bs text-gray-700">
+                  It helps you operate from the strongest, clearest version of yourself instead of copying someone else's style.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* How to Take This Assessment - GitHub style guide */}
           <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
@@ -366,26 +386,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </div>
           </div>
 
-          {/* Assessment Purpose - GitHub style callout */}
-          <div className="border-l-4 border-[var(--bs-color-indigo)] bg-blue-50 rounded-r-xl p-8">
-            <div className="flex items-start gap-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h4 className="typo-h3-bs text-gray-900 mb-3">
-                  This assessment is designed to reveal your real mental wiring
-                </h4>
-                <p className="typo-body-bs text-gray-700 mb-3">
-                  Not who you think you "should" be, not who others expect you to be, but who you truly are when making decisions that matter.
-                </p>
-                <p className="typo-body-bs text-gray-700">
-                  It helps you operate from the strongest, clearest version of yourself instead of copying someone else's style.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Why Your Honesty Matters - GitHub style note */}
           <div className="border border-gray-200 rounded-xl bg-white p-8">
             <div className="flex items-start gap-6 mb-4">
@@ -435,7 +435,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <div className="space-y-4">
             {/* Intro paragraph */}
             <p className="text-lg text-gray-600 max-w-2xl mr-auto text-left" style={{ fontFamily: 'Inter, Poppins, sans-serif' }}>
-              After completing the assessment, you will gain awareness how you as an individual make decisions.
+              After completing the assessment, you'll gain clarity on how you make decisions, and receive the following:
             </p>
             
             {/* Separator line */}
@@ -448,20 +448,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <div className="space-y-4">
             <PersonalizedFeatureCard 
               icon={Brain}
-              title="Decision Intelligence"
-              description="Your E-DNA profile powers a personalised Decision Intelligence system that helps you understand how you think and make decisions."
+              title="Decision Intelligence Results"
+              description="Your E-DNA results uncover the full system behind your decisions — the interaction between your logic, intuition, learning style, wiring, patterns, mindset, and values — so you can lead from your strongest and most aligned self."
               iconGradient={['#42047D', '#841477']}
             />
             <PersonalizedFeatureCard 
               icon={Users}
-              title="Dual AI Models"
-              description="Two AI mentors support you with real-time clarity—one focused on structure, the other on vision—so your decisions stay balanced and aligned."
+              title="Dual AI Mentors"
+              description="Two AI guides support you in real time: • one strengthens Decision Intelligence • one strengthens Collaboration Mastery. Together, they help you scale Faster."
               iconGradient={['#C72170', '#EC4049']}
             />
             <PersonalizedFeatureCard 
               icon={FileText}
-              title="Workbooks"
-              description="Interactive workbooks give you step-by-step frameworks to apply your insights and strengthen your decision loop in practice."
+              title="Interactive Workbooks"
+              description="Step-by-step Decision Mastery Workbook translates your E-DNA insights into practical action — so you can stabilise your loop, avoid common traps, and make better decisions daily."
               iconGradient={['#F6782F', '#EC4049']}
             />
           </div>
@@ -475,9 +475,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <Card className="rounded-lg" style={{ backgroundColor: '#F3E8FF', border: 'none' }}>
             <CardContent className="pt-6 pb-6">
               <p className="text-center">
-                <strong style={{ color: '#841477', fontFamily: 'Inter, Poppins, sans-serif' }}>Result:</strong>{' '}
-                <span style={{ color: '#9F7AEA', fontFamily: 'Inter, Poppins, sans-serif' }}>
-                  An ecosystem designed to help you make better decisions—consistently and confidently.
+                <strong style={{ color: '#841477', fontFamily: 'Inter, Poppins, sans-serif' }}>The Result</strong>
+                <br />
+                <span style={{ color: '#841477', fontFamily: 'Inter, Poppins, sans-serif' }}>
+                  A complete ecosystem designed to help you make better decisions — consistently, confidently, and without confusion.
                 </span>
               </p>
             </CardContent>
@@ -495,10 +496,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </div>
           <h3 className="typo-h2-bs">Your EDNA Profile Awaits</h3>
           <p className="typo-body-bs text-gray-700 max-w-2xl mx-auto">
-            In just 15-18 minutes, you'll have a comprehensive understanding of how you think, learn, and lead—plus a personalized roadmap for growth.
+            In just 30-40 mins, you'll have a comprehensive understanding of how you think, learn, and lead—plus a personalized roadmap for growth.
           </p>
             <p className="typo-caption-bs text-gray-600">
-            Takes 15-18 minutes · 45 questions · No wrong answers
+            Takes 30-40 mins · 45 questions · No wrong answers
             </p>
         </div>
       )
