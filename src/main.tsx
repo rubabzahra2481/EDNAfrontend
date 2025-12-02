@@ -1,6 +1,7 @@
   import { createRoot } from "react-dom/client";
   import App from "./App.tsx";
   import "./index.css";
+  import "./styles/print.css";
 
 // Error boundary for development
 window.addEventListener('error', (event) => {

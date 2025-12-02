@@ -1,0 +1,51 @@
+/* Print styles for perfect PDF generation */
+@media print {
+  /* Hide elements that shouldn't appear in PDF */
+  [data-pdf-download],
+  [data-share-button],
+  [data-dashboard-button],
+  [data-sidebar],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Preserve colors and backgrounds */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Ensure full page width */
+  [data-pdf-content] {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  /* Prevent page breaks inside important sections */
+  .hero-section,
+  .core-identity-section,
+  .subtype-section,
+  .mirror-pair-section,
+  .decision-loop-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Ensure backgrounds are printed */
+  .bg-gradient-to-r,
+  [style*="background"],
+  [style*="gradient"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+

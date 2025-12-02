@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { EDNAResultsPage } from './EDNAResultsPage';
-import { EDNAResults } from './EDNAQuiz';
+import { CompleteResultsPage } from './CompleteResultsPage';
+import { EDNAResults } from '../lib/scoring';
 
 /**
- * PDF Results Page - Renders EDNAResultsPage for PDF generation
+ * PDF Results Page - Renders CompleteResultsPage for PDF generation
  * This component reads results from URL parameters and renders the full results page
  * Used by Puppeteer to generate PDFs from the actual React component
  */
@@ -28,12 +28,13 @@ export function PDFResultsPage() {
       const decodedData = decodeURIComponent(dataParam);
       const parsedResults = JSON.parse(decodedData);
 
+      console.log('📄 PDF Results Page - Data received:', parsedResults);
       setResults(parsedResults);
-      setIsReady(true); // Set ready immediately - data-pdf-content is always "true"
+      setIsReady(true);
 
     } catch (err) {
-      console.error('Error parsing results:', err);
-      setError('Failed to load results data');
+      console.error('❌ Error parsing results:', err);
+      setError(`Failed to load results data: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setIsReady(true);
     }
   }, []);
@@ -41,15 +42,15 @@ export function PDFResultsPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-red-50" data-pdf-content="true">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-2">Error</h1>
+        <div className="text-center p-8">
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Profile data not found</h1>
           <p className="text-gray-600">{error}</p>
         </div>
       </div>
     );
   }
 
-  if (!results) {
+  if (!results || !isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center" data-pdf-content="true">
         <div className="text-center">
@@ -62,10 +63,10 @@ export function PDFResultsPage() {
 
   return (
     <div data-pdf-content="true">
-      <EDNAResultsPage
+      <CompleteResultsPage
         results={results}
-        onRetakeQuiz={() => {}}
-        onViewChange={() => {}}
+        userEmail={results.name || 'User'}
+        isStandalone={true}
       />
     </div>
   );

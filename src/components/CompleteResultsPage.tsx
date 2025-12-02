@@ -666,109 +666,40 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   const isArchitect = core_type === 'architect';
   const isMixed = core_type === 'blurred';
 
-  // PDF Download Handler - Server-side generation using Puppeteer
-  const handleDownloadPDF = async () => {
-    const button = document.querySelector('[data-pdf-download]') as HTMLButtonElement;
-    const originalText = button?.textContent || 'Download';
-    
+  // PDF Download Handler - Use browser's native print for perfect colors
+  const handleDownloadPDF = () => {
     if (!results) {
       alert('No results available to download');
       return;
     }
     
-    let progressInterval: NodeJS.Timeout | null = null;
+    console.log('📥 Opening print dialog for PDF export...');
+    console.log('💡 In the print dialog: Select "Save as PDF" as the destination');
     
-    try {
-      // Show loading state with progress
-      const startTime = Date.now();
-      if (button) {
-        button.textContent = 'Generating PDF... (0s)';
-        button.disabled = true;
-        
-        // Update progress every second
-        progressInterval = setInterval(() => {
-          const elapsed = Math.floor((Date.now() - startTime) / 1000);
-          if (button && button.textContent?.includes('Generating')) {
-            button.textContent = `Generating PDF... (${elapsed}s)`;
-          }
-        }, 1000);
-      }
-
-      console.log('📥 Requesting PDF generation from server...');
-
-      // Call backend endpoint to generate PDF
-      const response = await fetch(`${BACKEND_URL}/api/quiz/download-pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          results: results,
-          name: userEmail.split('@')[0] || 'User'
-        })
-      });
+    // Set document title for better filename suggestion
+    const originalTitle = document.title;
+    const coreTypeName = core_type === 'alchemist' ? 'Alchemist' : 
+                        core_type === 'architect' ? 'Architect' : 'Mixed';
+    document.title = `EDNA-Results-${coreTypeName}-${new Date().toISOString().split('T')[0]}`;
+    
+    // Scroll to top for better PDF capture
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+    
+    // Small delay to ensure scroll completes
+    setTimeout(() => {
+      // Trigger browser's print dialog
+      // The print.css stylesheet will hide UI elements and ensure perfect colors
+      window.print();
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `Server error: ${response.status}`);
-      }
-      
-      // Get PDF blob from response
-      const blob = await response.blob();
-      
-      // Generate filename from response headers or create default
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = `EDNA-Results-${core_type || 'Results'}-${new Date().toISOString().split('T')[0]}.pdf`;
-      
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      // Create download link and trigger download
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-            
-      // Cleanup
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      console.log('✅ PDF downloaded successfully');
-
-      // Clear progress interval
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-
-      // Reset button
-      if (button) {
-        button.textContent = originalText;
-        button.disabled = false;
-      }
-      
-    } catch (error) {
-      console.error('❌ Error downloading PDF:', error);
-      
-      // Clear progress interval
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-      
-      // Reset button
-      if (button) {
-        button.textContent = originalText;
-        button.disabled = false;
-      }
-      
-      // Show error message
-      alert(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+      // Restore after print dialog closes
+      setTimeout(() => {
+        document.title = originalTitle;
+        window.scrollTo(0, originalScrollY);
+      }, 100);
+    }, 100);
+    
+    console.log('✅ Print dialog opened - Use "Save as PDF" for perfect color matching!');
   };
 
   // Debug logging
