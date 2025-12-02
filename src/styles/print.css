@@ -1,5 +1,11 @@
-/* Print styles for perfect PDF generation */
+/* Print styles for perfect PDF generation with sharp text */
 @media print {
+  /* Force high-quality rendering at actual size */
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
   /* Hide elements that shouldn't appear in PDF */
   [data-pdf-download],
   [data-share-button],
@@ -9,17 +15,20 @@
     display: none !important;
   }
 
-  /* Ensure proper page breaks */
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Preserve colors and backgrounds */
+  /* Preserve colors and backgrounds - MOST IMPORTANT for gradients */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
+  }
+
+  /* High-quality text rendering for entire document */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
   }
 
   /* Ensure full page width */
@@ -27,7 +36,26 @@
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 15px !important;
+  }
+
+  /* CRITICAL: Force sharp text rendering on all headings */
+  h1, h2, h3, h4, h5, h6 {
+    -webkit-font-smoothing: subpixel-antialiased !important;
+    -moz-osx-font-smoothing: auto !important;
+    text-rendering: geometricPrecision !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    font-weight: 700 !important;
+    transform: translateZ(0) !important; /* Force GPU rendering for sharpness */
+  }
+
+  /* Main heading - Force maximum sharpness */
+  h1 {
+    font-size: 3rem !important; /* Ensure large size for clarity */
+    line-height: 1.2 !important;
+    letter-spacing: -0.025em !important;
+    font-weight: 800 !important;
   }
 
   /* Prevent page breaks inside important sections */
@@ -36,16 +64,32 @@
   .subtype-section,
   .mirror-pair-section,
   .decision-loop-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  /* Ensure backgrounds are printed */
+  /* Ensure all backgrounds and gradients print perfectly */
   .bg-gradient-to-r,
+  [class*="gradient"],
   [style*="background"],
-  [style*="gradient"] {
+  [style*="gradient"],
+  div[class*="bg-"] {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Prevent any image/graphic blurring */
+  img, svg, canvas {
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
+  }
+
+  /* Force all text to render sharply */
+  p, span, div, a, li, td, th, label, input, textarea {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
   }
 }
 

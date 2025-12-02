@@ -666,7 +666,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   const isArchitect = core_type === 'architect';
   const isMixed = core_type === 'blurred';
 
-  // PDF Download Handler - Use browser's native print for perfect colors
+  // PDF Download Handler - Use browser's native print for perfect colors and sharp text
   const handleDownloadPDF = () => {
     if (!results) {
       alert('No results available to download');
@@ -674,7 +674,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     }
     
     console.log('📥 Opening print dialog for PDF export...');
-    console.log('💡 In the print dialog: Select "Save as PDF" as the destination');
+    console.log('💡 Select "Save as PDF" → Click "Save"');
     
     // Set document title for better filename suggestion
     const originalTitle = document.title;
@@ -689,7 +689,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     // Small delay to ensure scroll completes
     setTimeout(() => {
       // Trigger browser's print dialog
-      // The print.css stylesheet will hide UI elements and ensure perfect colors
+      // The print.css stylesheet will hide UI elements and ensure perfect colors + sharp text
       window.print();
       
       // Restore after print dialog closes
@@ -699,7 +699,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       }, 100);
     }, 100);
     
-    console.log('✅ Print dialog opened - Use "Save as PDF" for perfect color matching!');
+    console.log('✅ Print dialog opened - Use "Save as PDF" for perfect colors & sharp text!');
   };
 
   // Debug logging
@@ -1019,16 +1019,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={(e) => {
-                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
-                          if (isMobile) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return;
-                          }
+                        onClick={() => {
                           onViewChange?.('dashboard');
                         }}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
+                        data-dashboard-button
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 cursor-pointer"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -1813,16 +1808,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={(e) => {
-                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
-                          if (isMobile) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return;
-                          }
+                        onClick={() => {
                           onViewChange?.('dashboard');
                         }}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
+                        data-dashboard-button
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 cursor-pointer"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -2597,16 +2587,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <button 
-                        onClick={(e) => {
-                          const isMobile = window.matchMedia('(max-width: 767px)').matches;
-                          if (isMobile) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return;
-                          }
+                        onClick={() => {
                           onViewChange?.('dashboard');
                         }}
-                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
+                        data-dashboard-button
+                        className="text-sm font-semibold flex items-center gap-2 text-black hover:text-gray-700 transition-colors px-3 py-2 cursor-pointer"
                       >
                         <Home className="w-4 h-4" />
                         <span className="hidden sm:inline">Dashboard</span>
@@ -3314,16 +3299,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           </div>
           <div className="flex items-center space-x-6">
             <button 
-              onClick={(e) => {
-                const isMobile = window.matchMedia('(max-width: 767px)').matches;
-                if (isMobile) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return;
-                }
+              onClick={() => {
                 onViewChange?.('dashboard');
               }}
-              className="text-sm font-semibold flex items-center space-x-2 hover:text-purple-600 transition-colors md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
+              data-dashboard-button
+              className="text-sm font-semibold flex items-center space-x-2 hover:text-purple-600 transition-colors cursor-pointer"
             >
               <span>🏠</span>
               <span>Dashboard</span>

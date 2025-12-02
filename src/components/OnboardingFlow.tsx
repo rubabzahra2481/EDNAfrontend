@@ -302,7 +302,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-[var(--bs-color-indigo)] mt-0.5 flex-shrink-0" />
-                  <span className="typo-body-bs text-gray-700">30–40 minutes to complete</span>
+                  <span className="typo-body-bs text-gray-700">15–20 minutes to complete</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-[var(--bs-color-indigo)] mt-0.5 flex-shrink-0" />
@@ -512,10 +512,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </div>
           <h3 className="typo-h2-bs">Your EDNA Profile Awaits</h3>
           <p className="typo-body-bs text-gray-700 max-w-2xl mx-auto">
-            In just 30-40 mins, you'll have a comprehensive understanding of how you think, learn, and lead—plus a personalized roadmap for growth.
+            In just 15-20 mins, you'll have a comprehensive understanding of how you think, learn, and lead—plus a personalized roadmap for growth.
           </p>
             <p className="typo-caption-bs text-gray-600">
-            Takes 30-40 mins · 45 questions · No wrong answers
+            Takes 15-20 mins · 45 questions · No wrong answers
             </p>
         </div>
       )
