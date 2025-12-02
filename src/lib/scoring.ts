@@ -61,6 +61,10 @@ export interface Layer4Result {
     readWrite: number;
     kinesthetic: number;
   };
+  approach?: string;
+  conceptProcessing?: string;
+  workingEnvironment?: string;
+  pace?: string;
 }
 
 export interface Layer5Result {
@@ -334,7 +338,46 @@ export function calculateLayer4(answers: UserAnswers): Layer4Result {
     }
   }
 
-  return { dominantModality, scores, percentages };
+  // Calculate other learning style dimensions
+  let approach: string | undefined;
+  let conceptProcessing: string | undefined;
+  let workingEnvironment: string | undefined;
+  let pace: string | undefined;
+
+  layer4Questions.forEach((question) => {
+    const answerValue = answers[question.id];
+    
+    if (answerValue && question.dimension !== 'Modality Preference') {
+      const selectedOption = question.options.find(opt => opt.value === answerValue);
+      
+      if (selectedOption && selectedOption.score) {
+        switch (question.dimension) {
+          case 'Approach':
+            approach = selectedOption.score;
+            break;
+          case 'Concept Processing':
+            conceptProcessing = selectedOption.score;
+            break;
+          case 'Working Environment':
+            workingEnvironment = selectedOption.score;
+            break;
+          case 'Pace':
+            pace = selectedOption.score;
+            break;
+        }
+      }
+    }
+  });
+
+  return { 
+    dominantModality, 
+    scores, 
+    percentages,
+    approach,
+    conceptProcessing,
+    workingEnvironment,
+    pace
+  };
 }
 
 /**
@@ -480,9 +523,9 @@ export function calculateLayer7(answers: UserAnswers): Layer7Result {
   const beliefs: { [dimension: string]: string } = {};
 
   // Client's exact mapping based on question ID and answer value
-  const q40Map: { [key: string]: string } = { 'a': 'Self-Relient', 'b': 'Faith-Relient', 'c': 'Dual-Relient' };
+  const q40Map: { [key: string]: string } = { 'a': 'Self-Reliant', 'b': 'Faith-Reliant', 'c': 'Dual-Reliant' };
   const q41Map: { [key: string]: string } = { 'a': "I'm In Control", 'b': 'Life Influences Me', 'c': 'Shared Control' };
-  const q42Map: { [key: string]: string } = { 'a': 'Responsibility', 'b': 'Compassion', 'c': 'Balanced' };
+  const q42Map: { [key: string]: string } = { 'a': 'Responsibility View', 'b': 'Compassion View', 'c': 'Balanced View' };
   const q43Map: { [key: string]: string } = { 'a': 'Direct Honesty', 'b': 'Gentle Honesty', 'c': 'Balanced Honesty' };
   const q44Map: { [key: string]: string } = { 'a': 'Growth Focused', 'b': 'Comfort Focused', 'c': 'Steady Growth' };
   const q45Map: { [key: string]: string } = { 'a': 'Self-Focused Impact', 'b': 'Others-Focused Impact', 'c': 'Shared Impact' };
@@ -569,6 +612,10 @@ export interface EDNAResults {
       readWrite: number;
       kinesthetic: number;
     };
+    approach?: string;
+    concept_processing?: string;
+    working_environment?: string;
+    pace?: string;
   };
   neurodiversity: {
     indicators: string[];
@@ -582,6 +629,13 @@ export interface EDNAResults {
     traits: string[];
     score: number;
   };
+  // Include raw layer results for detailed analysis
+  layer2?: Layer2Result;
+  layer3?: Layer3Result;
+  layer4?: Layer4Result;
+  layer5?: Layer5Result;
+  layer6?: Layer6Result;
+  layer7?: Layer7Result;
 }
 
 /**
@@ -641,16 +695,21 @@ export function transformToEDNAResults(quizResults: QuizResults): EDNAResults {
   // Learning style from layer4
   const learning_style = {
     dominant: layer4.dominantModality,
-    percentages: layer4.percentages
+    percentages: layer4.percentages,
+    approach: layer4.approach,
+    concept_processing: layer4.conceptProcessing,
+    working_environment: layer4.workingEnvironment,
+    pace: layer4.pace
   };
   
-  // Neurodiversity from layer5
+  // Neurodiversity from layer5 - include full layer5 result for detailed analysis
   const neurodiversity = {
     indicators: layer5.primaryProfile ? [layer5.primaryProfile] : [],
     score: 0 // Will be calculated if needed
   };
   
   console.log('🔄 [Transform] Layer 5 primary profile:', layer5.primaryProfile);
+  console.log('🔄 [Transform] Layer 5 profile dimensions:', layer5.profile);
   
   // Mindset from layer6
   const mindset_transformed = {
@@ -662,15 +721,18 @@ export function transformToEDNAResults(quizResults: QuizResults): EDNAResults {
     score: 0 // Will be calculated if needed
   };
   
-  // Personality from layer7
+  // Personality from layer6 (not layer7 - that's meta-beliefs)
   const personality_transformed = {
-    traits: Object.values(layer7.beliefs),
+    traits: [
+      layer6.personality.coreType,
+      layer6.personality.communicationStyle
+    ],
     score: 0 // Will be calculated if needed
   };
   
   console.log('🔄 [Transform] Layer 7 beliefs:', layer7.beliefs);
   
-  const transformedResults = {
+  const transformedResults: EDNAResults = {
     core_type,
     core_type_mastery,
     opposite_awareness,
@@ -682,10 +744,22 @@ export function transformToEDNAResults(quizResults: QuizResults): EDNAResults {
     learning_style,
     neurodiversity,
     mindset: mindset_transformed,
-    personality: personality_transformed
+    personality: personality_transformed,
+    // Include raw layer results for detailed analysis in results page
+    layer2: layer2,
+    layer3: layer3,
+    layer4: layer4,
+    layer5: layer5, // Include full layer5 result with profile dimensions and primaryProfile
+    layer6: layer6, // Include full layer6 result with mindset and personality
+    layer7: layer7 // Include full layer7 result with beliefs
   };
   
   console.log('✅ [Transform] Transformation complete:', transformedResults);
+  console.log('✅ [Transform] Layer 5 included with primaryProfile:', layer5.primaryProfile);
+  console.log('✅ [Transform] Layer 5 profile dimensions:', layer5.profile);
+  console.log('✅ [Transform] Layer 6 included with mindset:', layer6.mindset);
+  console.log('✅ [Transform] Layer 6 personality:', layer6.personality);
+  console.log('✅ [Transform] Layer 7 beliefs:', layer7.beliefs);
   
   return transformedResults;
 }

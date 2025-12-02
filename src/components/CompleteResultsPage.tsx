@@ -436,19 +436,186 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     };
   };
 
-  // Mirror Pair Awareness descriptions
-  const getMirrorAwarenessDescription = (score: number): string => {
-    if (score >= 66) {
+  // Mirror Pair Awareness descriptions - uses calculated dimension scores and labels from Layer 3
+  const getMirrorAwarenessDescription = (score: number, layer3Result?: any): string => {
+    // Use calculated score from layer3Result if available, otherwise use provided score
+    const calculatedScore = layer3Result?.totalScore !== undefined && layer3Result?.maxScore !== undefined
+      ? Math.round((layer3Result.totalScore / layer3Result.maxScore) * 100)
+      : score;
+    
+    // If we have dimension data from Layer 3, generate personalized description
+    if (layer3Result?.dimensions && Object.keys(layer3Result.dimensions).length > 0) {
+      const dimensions = layer3Result.dimensions;
+      const dimensionNames = Object.keys(dimensions);
+      
+      // Count high-performing dimensions (score >= 2, which is the "Full/Integrated/Aware" level)
+      const highDimensions = dimensionNames.filter(dim => dimensions[dim].score >= 2);
+      const mediumDimensions = dimensionNames.filter(dim => dimensions[dim].score === 1);
+      const lowDimensions = dimensionNames.filter(dim => dimensions[dim].score === 0);
+      
+      // Get dimension labels to understand patterns
+      const labels = dimensionNames.map(dim => dimensions[dim].label);
+      const hasFullAwareness = labels.some(label => ['Full', 'Integrated', 'Open', 'Aware', 'Fast', 'Growth'].includes(label));
+      const hasPartialAwareness = labels.some(label => ['Partial', 'Aware', 'Selective', 'Emerging', 'Moderate', 'Mixed'].includes(label));
+      const hasLowAwareness = labels.some(label => ['Opposite', 'Reactive', 'Defensive', 'Unaware', 'Slow', 'Fixed'].includes(label));
+      
+      // Generate personalized description based on dimension performance
+      if (calculatedScore >= 66 && highDimensions.length >= 4) {
+        // High overall score with strong dimension performance
+        if (hasFullAwareness && !hasLowAwareness) {
+          return 'You consistently recognize and integrate different perspectives, actively adjusting decisions when others reveal insights you might miss.';
+        }
+        return 'You understand others perspectives well and integrate their insights into stronger decisions';
+      } else if (calculatedScore >= 66) {
+        // High score but mixed dimension performance
+        return 'You generally understand different perspectives, though some areas may need more attention to fully integrate opposing views.';
+      } else if (calculatedScore >= 33) {
+        // Medium score - analyze which dimensions are weak
+        if (hasLowAwareness && lowDimensions.length >= 2) {
+          return 'You can collaborate with different thinkers, but struggle in some areas. When opposite styles clash, you may feel frustrated or misunderstood.';
+        } else if (hasPartialAwareness) {
+          return 'You can collaborate with different thinkers, but inconsistently. Alignment depends on the situation and your comfort level with their approach.';
+        }
+        return 'You can collaborate with different thinkers, but inconsistently. Alignment depends on the situation.';
+      } else {
+        // Low score - identify specific challenges
+        if (hasLowAwareness && lowDimensions.length >= 3) {
+          return 'You find opposite thinkers difficult to work with. Their style feels disruptive or confusing, and you often struggle to understand how they think.';
+        } else if (labels.some(label => ['Defensive', 'Reactive'].includes(label))) {
+          return 'You find opposite thinkers challenging. When they bring different views, you tend to defend your own approach rather than exploring their perspective.';
+        }
+        return 'You find opposite thinkers difficult to work with. Their style feels disruptive or confusing';
+      }
+    }
+    
+    // Fallback to score-based descriptions if no dimension data available
+    if (calculatedScore >= 66) {
       return 'You understand others perspectives well and integrate their insights into stronger decisions';
-    } else if (score >= 33) {
+    } else if (calculatedScore >= 33) {
       return 'You can collaborate with different thinkers, but inconsistently. Alignment depends on the situation.';
     } else {
       return 'You find opposite thinkers difficult to work with. Their style feels disruptive or confusing';
     }
   };
 
-  // Get Neurodiversity classification and description
-  const getNeurodiversityInfo = (neurodiversityData: any) => {
+  // Get Neurodiversity classification and description - uses calculated dimension scores from Layer 5
+  const getNeurodiversityInfo = (neurodiversityData: any, layer5Result?: any) => {
+    // First, try to get primaryProfile and profile dimensions from layer5Result (from scoring logic)
+    let primaryProfile: string | null = null;
+    let profileDimensions: Record<string, string> | null = null;
+    
+    if (layer5Result?.primaryProfile) {
+      primaryProfile = layer5Result.primaryProfile;
+      profileDimensions = layer5Result.profile || null;
+    } else if (layer5Result?.profile?.primaryProfile) {
+      primaryProfile = layer5Result.profile.primaryProfile;
+      profileDimensions = layer5Result.profile;
+    }
+    
+    // If we have calculated primaryProfile and dimension data, generate personalized description
+    if (primaryProfile && profileDimensions) {
+      const dimensionNames = Object.keys(profileDimensions);
+      const dimensionValues = Object.values(profileDimensions);
+      
+      // Count how many dimensions show neurodivergent vs neurotypical patterns
+      const ndDimensions = dimensionValues.filter(v => v === 'neurodivergent').length;
+      const ntDimensions = dimensionValues.filter(v => v === 'neurotypical').length;
+      const teDimensions = dimensionValues.filter(v => v === 'twice_exceptional').length;
+      
+      // Analyze specific dimension patterns
+      const hasFocusPattern = profileDimensions['Focus Pattern'];
+      const hasProcessingSpeed = profileDimensions['Processing Speed'];
+      const hasEnergyPattern = profileDimensions['Energy Pattern'];
+      const hasTaskSwitching = profileDimensions['Task Switching'];
+      const hasStressResponse = profileDimensions['Stress Response'];
+      const hasRecoveryPattern = profileDimensions['Recovery Pattern'];
+      
+      // Generate personalized description based on dimension patterns
+      if (primaryProfile === 'Twice-Exceptional') {
+        // Analyze which dimensions are strengths vs challenges
+        const strengthCount = teDimensions + (ndDimensions > 0 ? 1 : 0);
+        const challengeCount = ndDimensions;
+        
+        if (strengthCount >= 3 && challengeCount >= 2) {
+          return {
+            classification: 'Twice exceptional (2E)',
+            description: 'You excel in some areas with exceptional focus and depth, while other tasks may require different strategies or support to maintain consistent performance.'
+          };
+        } else if (hasFocusPattern === 'twice_exceptional' && hasProcessingSpeed === 'twice_exceptional') {
+          return {
+            classification: 'Twice exceptional (2E)',
+            description: 'You demonstrate exceptional capabilities in focused work and processing, but may need varied approaches to maintain engagement across different task types.'
+          };
+        }
+        return {
+          classification: 'Twice exceptional (2E)',
+          description: 'You work exceptionally well in some tasks but may struggle with others, requiring adaptive strategies to optimize your performance.'
+        };
+      } else if (primaryProfile === 'Neurodivergent') {
+        // Analyze specific neurodivergent patterns
+        if (hasEnergyPattern === 'neurodivergent' && hasTaskSwitching === 'neurodivergent') {
+          return {
+            classification: 'Neurodivergent',
+            description: 'You work in waves of high energy and focus, and benefit from movement, variety, and flexible task switching to maintain engagement.'
+          };
+        } else if (hasFocusPattern === 'neurodivergent' && hasProcessingSpeed === 'neurodivergent') {
+          return {
+            classification: 'Neurodivergent',
+            description: 'Your focus and processing work best with stimulation, movement, or variety. You may need breaks and different approaches to stay engaged effectively.'
+          };
+        } else if (hasStressResponse === 'neurodivergent' || hasRecoveryPattern === 'neurodivergent') {
+          return {
+            classification: 'Neurodivergent',
+            description: 'You work in waves and may need stimulation, movement, or variety to stay engaged. Managing stress and recovery patterns is important for sustained performance.'
+          };
+        }
+        return {
+          classification: 'Neurodivergent',
+          description: 'You work in waves and may need stimulation, movement or variety to stay engaged.'
+        };
+      } else if (primaryProfile === 'Neurotypical') {
+        // Analyze neurotypical patterns
+        if (ntDimensions >= 5) {
+          return {
+            classification: 'Neurotypical',
+            description: 'You work in a consistent, natural rhythm with steady focus and predictable energy patterns across most tasks.'
+          };
+        } else if (hasFocusPattern === 'neurotypical' && hasEnergyPattern === 'neurotypical') {
+          return {
+            classification: 'Neurotypical',
+            description: 'You maintain steady focus and energy patterns, working in a natural rhythm that supports consistent performance.'
+          };
+        }
+        return {
+          classification: 'Neurotypical',
+          description: 'You work normally in a natural rhythm'
+        };
+      }
+    }
+    
+    // If we have calculated primaryProfile but no dimension data, use basic classification
+    if (primaryProfile) {
+      const basicMap: Record<string, { classification: string; description: string }> = {
+        'Twice-Exceptional': {
+          classification: 'Twice exceptional (2E)',
+          description: 'You work exceptionally good in some task but may struggle with others'
+        },
+        'Neurodivergent': {
+          classification: 'Neurodivergent',
+          description: 'You work in waves and may need stimulation, movement or variety to stay engaged.'
+        },
+        'Neurotypical': {
+          classification: 'Neurotypical',
+          description: 'You work normally in a natural rhythm'
+        }
+      };
+      
+      if (basicMap[primaryProfile]) {
+        return basicMap[primaryProfile];
+      }
+    }
+    
+    // Fallback: Check legacy data structure
     const typedNeuro = neurodiversityData as any;
     const hasTraits = typedNeuro?.adhd_traits || typedNeuro?.dyslexia_traits || typedNeuro?.autism_traits || 
                       typedNeuro?.sensory_sensitivity || 
@@ -491,6 +658,14 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     mindset = {},
     personality = {},
   } = results || {};
+  
+  // Extract layer results from scoring (if available)
+  const layer2Result = (results as any)?.layer2;
+  const layer3Result = (results as any)?.layer3;
+  const layer4Result = (results as any)?.layer4;
+  const layer5Result = (results as any)?.layer5;
+  const layer6Result = (results as any)?.layer6;
+  const layer7Result = (results as any)?.layer7;
 
   // Determine which template to use
   const isAlchemist = core_type === 'alchemist';
@@ -599,31 +774,42 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     ? 'from-purple-900 via-orange-500 to-purple-900'
     : 'from-purple-900 to-orange-500';
 
-  // Helper function to extract mindset values
-  const getMindsetValues = (mindsetData: any) => {
+  // Helper function to extract mindset values - uses calculated results from Layer 6
+  const getMindsetValues = (mindsetData: any, layer6Result?: any) => {
+    // First, try to get mindset from layer6Result (from scoring logic)
+    if (layer6Result?.mindset) {
+      return {
+        growthFixed: layer6Result.mindset.growthFixed || '',
+        abundanceScarcity: layer6Result.mindset.abundanceScarcity || '',
+        challengeComfort: layer6Result.mindset.challengeComfort || ''
+      };
+    }
+    
+    // Fallback: Check legacy data structure
     const typedMindset = mindsetData as any;
     // Check if it's the new structure with mindset_personality
     if (typedMindset?.mindset_personality) {
       const m = typedMindset.mindset_personality.mindset;
       return {
-        growthFixed: m?.growthFixed || 'Growth',
-        abundanceScarcity: m?.abundanceScarcity || 'Abundance',
-        challengeComfort: m?.challengeComfort || 'Challenge'
+        growthFixed: m?.growthFixed || '',
+        abundanceScarcity: m?.abundanceScarcity || '',
+        challengeComfort: m?.challengeComfort || ''
       };
     }
     // Check if it's an object with traits array
     if (Array.isArray(typedMindset?.traits)) {
       const traits = typedMindset.traits;
       return {
-        growthFixed: traits.find((t: string) => t.includes('Growth') || t.includes('Fixed'))?.replace(' Mindset', '') || 'Growth',
-        abundanceScarcity: traits.find((t: string) => t.includes('Abundance') || t.includes('Scarcity'))?.replace(' Mindset', '') || 'Abundance',
-        challengeComfort: traits.find((t: string) => t.includes('Challenge') || t.includes('Comfort'))?.replace(' Mindset', '') || 'Challenge'
+        growthFixed: traits.find((t: string) => t.includes('Growth') || t.includes('Fixed'))?.replace(' Mindset', '') || '',
+        abundanceScarcity: traits.find((t: string) => t.includes('Abundance') || t.includes('Scarcity'))?.replace(' Mindset', '') || '',
+        challengeComfort: traits.find((t: string) => t.includes('Challenge') || t.includes('Comfort'))?.replace(' Mindset', '') || ''
       };
     }
+    // Return empty values if no data found (should not happen with proper scoring)
     return {
-      growthFixed: 'Growth',
-      abundanceScarcity: 'Abundance',
-      challengeComfort: 'Challenge'
+      growthFixed: '',
+      abundanceScarcity: '',
+      challengeComfort: ''
     };
   };
 
@@ -707,44 +893,75 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     return validSubtypes.join(' + ');
   };
 
-  // Helper function to extract meta-beliefs values
-  const getMetaBeliefsValues = (metaBeliefsData: any) => {
+  // Helper function to extract meta-beliefs values - uses calculated results from Layer 7
+  const getMetaBeliefsValues = (metaBeliefsData: any, layer7Result?: any) => {
+    // First, try to get beliefs from layer7Result (from scoring logic)
+    let calculatedBeliefs: Record<string, string> | null = null;
+    
+    if (layer7Result?.beliefs) {
+      calculatedBeliefs = layer7Result.beliefs;
+    } else if (layer7Result?.layer7?.beliefs) {
+      calculatedBeliefs = layer7Result.layer7.beliefs;
+    }
+    
+    // If we have calculated beliefs, use them directly
+    if (calculatedBeliefs) {
+      return {
+        faithOrientation: calculatedBeliefs['Grounding Source'] || calculatedBeliefs['GroundingSource'] || '',
+        controlOrientation: calculatedBeliefs['Control Belief'] || calculatedBeliefs['ControlBelief'] || '',
+        fairnessView: calculatedBeliefs['Fairness View'] || calculatedBeliefs['FairnessView'] || '',
+        integrityStyle: calculatedBeliefs['Honesty Style'] || calculatedBeliefs['HonestyStyle'] || '',
+        growthPreference: calculatedBeliefs['Growth Approach'] || calculatedBeliefs['GrowthApproach'] || '',
+        impactPreference: calculatedBeliefs['Impact Motivation'] || calculatedBeliefs['ImpactMotivation'] || ''
+      };
+    }
+    
+    // Fallback: Check legacy data structure
     const typedMeta = metaBeliefsData as any;
     // Check if it has a beliefs object (from layer7 calculation)
     if (typedMeta?.beliefs) {
       return {
-        faithOrientation: typedMeta.beliefs['Grounding Source'] || 'Self-Reliant',
-        controlOrientation: typedMeta.beliefs['Control Belief'] || "I'm In Control",
-        fairnessView: typedMeta.beliefs['Fairness View'] || 'Responsibility View',
-        integrityStyle: typedMeta.beliefs['Honesty Style'] || 'Direct Honesty',
-        growthPreference: typedMeta.beliefs['Growth Approach'] || 'Growth Focused',
-        impactPreference: typedMeta.beliefs['Impact Motivation'] || 'Self-Focused Impact'
+        faithOrientation: typedMeta.beliefs['Grounding Source'] || '',
+        controlOrientation: typedMeta.beliefs['Control Belief'] || '',
+        fairnessView: typedMeta.beliefs['Fairness View'] || '',
+        integrityStyle: typedMeta.beliefs['Honesty Style'] || '',
+        growthPreference: typedMeta.beliefs['Growth Approach'] || '',
+        impactPreference: typedMeta.beliefs['Impact Motivation'] || ''
       };
     }
     // Check if it has composite_values
     if (typedMeta?.composite_values) {
       return {
-        faithOrientation: typedMeta.composite_values.faithOrientation || typedMeta.composite_values['FaithOrientation'] || 'Self-Reliant',
-        controlOrientation: typedMeta.composite_values.controlOrientation || typedMeta.composite_values['ControlOrientation'] || "I'm In Control",
-        fairnessView: typedMeta.composite_values.fairnessView || typedMeta.composite_values['FairnessView'] || 'Responsibility View',
-        integrityStyle: typedMeta.composite_values.integrityStyle || typedMeta.composite_values['IntegrityStyle'] || 'Direct Honesty',
-        growthPreference: typedMeta.composite_values.growthPreference || typedMeta.composite_values['GrowthPreference'] || 'Growth Focused',
-        impactPreference: typedMeta.composite_values.impactPreference || typedMeta.composite_values['ImpactPreference'] || 'Self-Focused Impact'
+        faithOrientation: typedMeta.composite_values.faithOrientation || typedMeta.composite_values['FaithOrientation'] || '',
+        controlOrientation: typedMeta.composite_values.controlOrientation || typedMeta.composite_values['ControlOrientation'] || '',
+        fairnessView: typedMeta.composite_values.fairnessView || typedMeta.composite_values['FairnessView'] || '',
+        integrityStyle: typedMeta.composite_values.integrityStyle || typedMeta.composite_values['IntegrityStyle'] || '',
+        growthPreference: typedMeta.composite_values.growthPreference || typedMeta.composite_values['GrowthPreference'] || '',
+        impactPreference: typedMeta.composite_values.impactPreference || typedMeta.composite_values['ImpactPreference'] || ''
       };
     }
-    // Default fallback
+    // Return empty values if no data found (should not happen with proper scoring)
     return {
-      faithOrientation: 'Self-Reliant',
-      controlOrientation: "I'm In Control",
-      fairnessView: 'Responsibility View',
-      integrityStyle: 'Direct Honesty',
-      growthPreference: 'Growth Focused',
-      impactPreference: 'Self-Focused Impact'
+      faithOrientation: '',
+      controlOrientation: '',
+      fairnessView: '',
+      integrityStyle: '',
+      growthPreference: '',
+      impactPreference: ''
     };
   };
 
-  // Helper function to extract personality values
-  const getPersonalityValues = (personalityData: any, mindsetPersonalityData?: any) => {
+  // Helper function to extract personality values - uses calculated results from Layer 6
+  const getPersonalityValues = (personalityData: any, mindsetPersonalityData?: any, layer6Result?: any) => {
+    // First, try to get personality from layer6Result (from scoring logic)
+    if (layer6Result?.personality) {
+      return {
+        coreType: layer6Result.personality.coreType || '',
+        communicationStyle: layer6Result.personality.communicationStyle || ''
+      };
+    }
+    
+    // Fallback: Check legacy data structure
     const typedPersonality = personalityData as any;
     const typedMindsetPersonality = mindsetPersonalityData as any;
     
@@ -752,8 +969,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     if (typedMindsetPersonality?.mindset_personality?.personality) {
       const p = typedMindsetPersonality.mindset_personality.personality;
       return {
-        coreType: p?.coreType || 'Confident & Steady',
-        communicationStyle: p?.communicationStyle || 'Diplomatic Communicator'
+        coreType: p?.coreType || '',
+        communicationStyle: p?.communicationStyle || ''
       };
     }
     // Check if it's an object with traits array
@@ -764,15 +981,16 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         t.includes('Confident & Driven') || 
         t.includes('Considerate & Steady') || 
         t.includes('Fast-Moving & Adaptive')
-      ) || 'Confident & Steady';
+      ) || '';
       const communicationStyle = traits.find((t: string) => 
         t.includes('Direct') || t.includes('Diplomatic')
-      ) || 'Diplomatic Communicator';
+      ) || '';
       return { coreType, communicationStyle };
     }
+    // Return empty values if no data found (should not happen with proper scoring)
     return {
-      coreType: 'Confident & Steady',
-      communicationStyle: 'Diplomatic Communicator'
+      coreType: '',
+      communicationStyle: ''
     };
   };
 
@@ -781,18 +999,20 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   // Alchemist-specific colorful Figma design - Matching Mixed layout
   if (isAlchemist) {
     const typedLearningStyle = learning_style as any;
-    // Extract modality - can be string, array, or in different properties
-    const modalityValue = Array.isArray(typedLearningStyle?.modality) 
-      ? typedLearningStyle.modality[0] 
-      : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual';
+    // Use calculated values from Layer 4 scoring if available, otherwise fall back to legacy data structure
+    const modalityValue = layer4Result?.dominantModality 
+      ? layer4Result.dominantModality
+      : (Array.isArray(typedLearningStyle?.modality) 
+        ? typedLearningStyle.modality[0] 
+        : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual');
     // Map to display format (capitalize first letter, handle Read/Write)
     const dominantModality = modalityValue === 'readWrite' || modalityValue === 'Read/Write' ? 'Read/Write' 
       : modalityValue === 'read_write' ? 'Read/Write'
       : modalityValue.charAt(0).toUpperCase() + modalityValue.slice(1).toLowerCase();
-    const approach = typedLearningStyle?.approach || 'Sequential';
-    const conceptProcessing = typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || 'Abstract';
-    const workingEnvironment = typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || 'Individual';
-    const pace = typedLearningStyle?.pace || 'Flexible';
+    const approach = layer4Result?.approach || typedLearningStyle?.approach || '';
+    const conceptProcessing = layer4Result?.conceptProcessing || typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || '';
+    const workingEnvironment = layer4Result?.workingEnvironment || typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || '';
+    const pace = layer4Result?.pace || typedLearningStyle?.pace || '';
     const mirrorLevel = mirror_awareness_score >= 66 ? 'HIGH' : mirror_awareness_score >= 33 ? 'MEDIUM' : 'LOW';
     const subtypeDisplay = Array.isArray(subtype) ? subtype[0] : subtype;
 
@@ -1150,7 +1370,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   {mirrorLevel}
                 </p>
                 <p className="text-[10px] font-normal text-black text-center">
-                  {getMirrorAwarenessDescription(mirror_awareness_score)}
+                  {getMirrorAwarenessDescription(mirror_awareness_score, layer3Result)}
                 </p>
               </div>
             </div>
@@ -1285,7 +1505,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             </div>
             <div className="p-4">
               {(() => {
-                const neuroInfo = getNeurodiversityInfo(neurodiversity);
+                const neuroInfo = getNeurodiversityInfo(neurodiversity, layer5Result);
                 return (
                   <>
                     <p 
@@ -1331,7 +1551,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Mindset</p>
                   {(() => {
-                    const mindsetVals = getMindsetValues(mindset);
+                    const mindsetVals = getMindsetValues(mindset, layer6Result);
                     return (
                       <div className="flex flex-col gap-1">
                         <p 
@@ -1374,7 +1594,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Personality</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -1399,7 +1619,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Communication</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -1442,7 +1662,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.faithOrientation;
                     })()}
                   </p>
@@ -1461,7 +1681,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.controlOrientation;
                     })()}
                   </p>
@@ -1480,7 +1700,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.fairnessView;
                     })()}
                   </p>
@@ -1499,7 +1719,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.integrityStyle;
                     })()}
                   </p>
@@ -1518,7 +1738,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.growthPreference;
                     })()}
                   </p>
@@ -1537,7 +1757,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.impactPreference;
                     })()}
                   </p>
@@ -1582,18 +1802,20 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   // Architect-specific colorful Figma design - Matching Mixed layout
   if (isArchitect) {
     const typedLearningStyle = learning_style as any;
-    // Extract modality - can be string, array, or in different properties
-    const modalityValue = Array.isArray(typedLearningStyle?.modality) 
-      ? typedLearningStyle.modality[0] 
-      : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual';
+    // Use calculated values from Layer 4 scoring if available, otherwise fall back to legacy data structure
+    const modalityValue = layer4Result?.dominantModality 
+      ? layer4Result.dominantModality
+      : (Array.isArray(typedLearningStyle?.modality) 
+        ? typedLearningStyle.modality[0] 
+        : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual');
     // Map to display format (capitalize first letter, handle Read/Write)
     const dominantModality = modalityValue === 'readWrite' || modalityValue === 'Read/Write' ? 'Read/Write' 
       : modalityValue === 'read_write' ? 'Read/Write'
       : modalityValue.charAt(0).toUpperCase() + modalityValue.slice(1).toLowerCase();
-    const approach = typedLearningStyle?.approach || 'Sequential';
-    const conceptProcessing = typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || 'Abstract';
-    const workingEnvironment = typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || 'Individual';
-    const pace = typedLearningStyle?.pace || 'Flexible';
+    const approach = layer4Result?.approach || typedLearningStyle?.approach || '';
+    const conceptProcessing = layer4Result?.conceptProcessing || typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || '';
+    const workingEnvironment = layer4Result?.workingEnvironment || typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || '';
+    const pace = layer4Result?.pace || typedLearningStyle?.pace || '';
     const mirrorLevel = mirror_awareness_score >= 66 ? 'HIGH' : mirror_awareness_score >= 33 ? 'MEDIUM' : 'LOW';
     const subtypeDisplay = Array.isArray(subtype) ? subtype[0] : subtype;
     
@@ -1940,7 +2162,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   {mirrorLevel}
                 </p>
                 <p className="text-[10px] font-normal text-black text-center">
-                  {getMirrorAwarenessDescription(mirror_awareness_score)}
+                  {getMirrorAwarenessDescription(mirror_awareness_score, layer3Result)}
                 </p>
               </div>
             </div>
@@ -2075,7 +2297,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             </div>
             <div className="p-4">
               {(() => {
-                const neuroInfo = getNeurodiversityInfo(neurodiversity);
+                const neuroInfo = getNeurodiversityInfo(neurodiversity, layer5Result);
                 return (
                   <>
                     <p 
@@ -2121,7 +2343,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Mindset</p>
                   {(() => {
-                    const mindsetVals = getMindsetValues(mindset);
+                    const mindsetVals = getMindsetValues(mindset, layer6Result);
                     return (
                       <div className="flex flex-col gap-1">
                         <p 
@@ -2164,7 +2386,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Personality</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -2189,7 +2411,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Communication</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -2232,7 +2454,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.faithOrientation;
                     })()}
                   </p>
@@ -2251,7 +2473,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.controlOrientation;
                     })()}
                   </p>
@@ -2270,7 +2492,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.fairnessView;
                     })()}
                   </p>
@@ -2289,7 +2511,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.integrityStyle;
                     })()}
                   </p>
@@ -2308,7 +2530,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.growthPreference;
                     })()}
                   </p>
@@ -2327,7 +2549,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.impactPreference;
                     })()}
                   </p>
@@ -2373,18 +2595,20 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   if (isMixed) {
     console.log('✅ Rendering Mixed/Blurred design with fixed alignment');
     const typedLearningStyle = learning_style as any;
-    // Extract modality - can be string, array, or in different properties
-    const modalityValue = Array.isArray(typedLearningStyle?.modality) 
-      ? typedLearningStyle.modality[0] 
-      : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual';
+    // Use calculated values from Layer 4 scoring if available, otherwise fall back to legacy data structure
+    const modalityValue = layer4Result?.dominantModality 
+      ? layer4Result.dominantModality
+      : (Array.isArray(typedLearningStyle?.modality) 
+        ? typedLearningStyle.modality[0] 
+        : typedLearningStyle?.modality || typedLearningStyle?.dominant || typedLearningStyle?.dominant_modality || 'Visual');
     // Map to display format (capitalize first letter, handle Read/Write)
     const dominantModality = modalityValue === 'readWrite' || modalityValue === 'Read/Write' ? 'Read/Write' 
       : modalityValue === 'read_write' ? 'Read/Write'
       : modalityValue.charAt(0).toUpperCase() + modalityValue.slice(1).toLowerCase();
-    const approach = typedLearningStyle?.approach || 'Sequential';
-    const conceptProcessing = typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || 'Abstract';
-    const workingEnvironment = typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || 'Individual';
-    const pace = typedLearningStyle?.pace || 'Flexible';
+    const approach = layer4Result?.approach || typedLearningStyle?.approach || '';
+    const conceptProcessing = layer4Result?.conceptProcessing || typedLearningStyle?.concept_processing || typedLearningStyle?.conceptProcessing || '';
+    const workingEnvironment = layer4Result?.workingEnvironment || typedLearningStyle?.working_environment || typedLearningStyle?.workingEnvironment || '';
+    const pace = layer4Result?.pace || typedLearningStyle?.pace || '';
     const mirrorLevel = mirror_awareness_score >= 66 ? 'HIGH' : mirror_awareness_score >= 33 ? 'MEDIUM' : 'LOW';
     const subtypeDisplay = Array.isArray(subtype) ? subtype[0] : subtype;
     
@@ -2637,7 +2861,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                   {mirrorLevel}
                 </p>
                 <p className="text-[10px] font-normal text-black text-center">
-                  {getMirrorAwarenessDescription(mirror_awareness_score)}
+                  {getMirrorAwarenessDescription(mirror_awareness_score, layer3Result)}
                 </p>
               </div>
             </div>
@@ -2787,7 +3011,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             </div>
             <div className="p-4">
               {(() => {
-                const neuroInfo = getNeurodiversityInfo(neurodiversity);
+                const neuroInfo = getNeurodiversityInfo(neurodiversity, layer5Result);
                 return (
                   <>
                     <p 
@@ -2836,7 +3060,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Mindset</p>
                   {(() => {
-                    const mindsetVals = getMindsetValues(mindset);
+                    const mindsetVals = getMindsetValues(mindset, layer6Result);
                     return (
                       <div className="flex flex-col gap-1">
                         <p 
@@ -2888,7 +3112,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Personality</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -2916,7 +3140,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                 >
                   <p className="text-[10px] font-bold text-black mb-2 text-center">Communication</p>
                   {(() => {
-                    const personalityVals = getPersonalityValues(personality, results);
+                    const personalityVals = getPersonalityValues(personality, results, layer6Result);
                     return (
                       <p 
                         className="text-[8px] font-bold text-center"
@@ -2965,7 +3189,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.faithOrientation;
                     })()}
                   </p>
@@ -2987,7 +3211,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.controlOrientation;
                     })()}
                   </p>
@@ -3009,7 +3233,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.fairnessView;
                     })()}
                   </p>
@@ -3031,7 +3255,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.integrityStyle;
                     })()}
                   </p>
@@ -3053,7 +3277,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.growthPreference;
                     })()}
                   </p>
@@ -3075,7 +3299,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     }}
                   >
                     {(() => {
-                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs);
+                      const metaVals = getMetaBeliefsValues((results as any).meta_beliefs, layer7Result);
                       return metaVals.impactPreference;
                     })()}
                   </p>
@@ -3467,19 +3691,56 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
               {/* Mindset */}
               <div className="border border-gray-200 rounded p-4">
                 <h4 className="font-bold text-sm mb-2">Mindset</h4>
-                <p className={`text-orange-500 font-semibold text-sm mb-2`}>Growth Mindset</p>
-                <p className="text-xs">
-                  You view challenges as opportunities and treat effort as improvement
-                </p>
+                {(() => {
+                  const mindsetVals = getMindsetValues(mindset, layer6Result);
+                  return (
+                    <>
+                      <p className={`text-orange-500 font-semibold text-sm mb-2`}>
+                        {mindsetVals.growthFixed} Mindset
+                      </p>
+                      <p className="text-xs">
+                        {mindsetVals.growthFixed === 'Growth' 
+                          ? 'You view challenges as opportunities and treat effort as improvement'
+                          : 'You tend to believe abilities are static and unchangeable'}
+                      </p>
+                      <p className={`text-orange-500 font-semibold text-sm mb-2 mt-2`}>
+                        {mindsetVals.abundanceScarcity} Mindset
+                      </p>
+                      <p className={`text-orange-500 font-semibold text-sm mb-2`}>
+                        {mindsetVals.challengeComfort} Mindset
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Personality */}
               <div className="border border-gray-200 rounded p-4">
                 <h4 className="font-bold text-sm mb-2">Personality</h4>
-                <p className={`text-orange-500 font-semibold text-sm mb-2`}>Confidently Patient</p>
-                <p className="text-xs">
-                  You are confident in your abilities and give your thoughts reasonable time to act on it
-                </p>
+                {(() => {
+                  const personalityVals = getPersonalityValues(personality, results, layer6Result);
+                  return (
+                    <>
+                      <p className={`text-orange-500 font-semibold text-sm mb-2`}>
+                        {personalityVals.coreType || 'Not Available'}
+                      </p>
+                      <p className="text-xs">
+                        {personalityVals.coreType === 'Confident & Steady'
+                          ? 'You are confident in your abilities and give your thoughts reasonable time to act on it'
+                          : personalityVals.coreType === 'Confident & Driven'
+                          ? 'You are confident and move quickly, driving results with decisive action'
+                          : personalityVals.coreType === 'Considerate & Steady'
+                          ? 'You are thoughtful and steady, taking time to consider before acting'
+                          : personalityVals.coreType === 'Fast-Moving & Adaptive'
+                          ? 'You move quickly and adapt easily to changing circumstances'
+                          : 'Your personality reflects a balance of confidence and consideration'}
+                      </p>
+                      <p className={`text-orange-500 font-semibold text-sm mb-2 mt-2`}>
+                        {personalityVals.communicationStyle || 'Not Available'}
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -3543,3 +3804,4 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     </div>
   );
 }
+
