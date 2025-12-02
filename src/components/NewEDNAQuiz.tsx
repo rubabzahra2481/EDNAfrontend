@@ -80,6 +80,9 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
     // Mark onboarding as completed in localStorage so it doesn't show again
     localStorage.setItem('edna-onboarding-completed', 'true');
     setShowOnboarding(false);
+    // Show Layer 1 introduction after onboarding
+    setLayerToIntroduce(1);
+    setShowLayerIntroduction(true);
   };
 
   // Handle answer selection
@@ -231,15 +234,15 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-orange-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-orange-50 py-4 sm:py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
+            <span className="font-medium text-gray-700">
               Layer {currentLayer} of 7
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="font-medium text-gray-700">
               {Math.round(progress)}% Complete
             </span>
           </div>
@@ -248,32 +251,32 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
 
         {/* Question Card */}
         <Card className="shadow-xl border-2 border-purple-100">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-orange-500 text-white">
-            <CardTitle className="text-2xl">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-orange-500 text-white px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl">
               Question {globalQuestionNumber} of {totalQuestions}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+          <CardContent className="p-4 sm:p-6 md:p-8">
+            <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-4 sm:mb-6 text-gray-800">
               {currentQuestion.text}
             </h3>
 
             <RadioGroup value={currentAnswer} onValueChange={handleAnswerChange}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {currentQuestion.options.map((option: any) => (
                   <div
                     key={option.value}
                     onClick={() => handleAnswerChange(option.value)}
-                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                    className={`flex items-start sm:items-center space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       currentAnswer === option.value
                         ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-200 hover:border-purple-400 hover:bg-purple-50'
                     }`}
                   >
-                    <RadioGroupItem value={option.value} id={option.value} />
+                    <RadioGroupItem value={option.value} id={option.value} className="mt-1 sm:mt-0 flex-shrink-0" />
                     <Label
                       htmlFor={option.value}
-                      className="flex-1 cursor-pointer text-base whitespace-pre-line"
+                      className="flex-1 cursor-pointer text-sm sm:text-base whitespace-pre-line"
                     >
                       {option.text}
                     </Label>
@@ -283,12 +286,12 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
             </RadioGroup>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
               <Button
                 onClick={handlePrevious}
                 disabled={currentLayer === 1 && currentQuestionIndex === 0}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto text-sm sm:text-base"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Previous
@@ -297,7 +300,7 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
               <Button
                 onClick={handleNext}
                 disabled={!currentAnswer}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-sm sm:text-base"
               >
                 {currentLayer === 7 && currentQuestionIndex === currentQuestions.length - 1
                   ? 'Complete Quiz'
@@ -309,7 +312,7 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
         </Card>
 
         {/* Layer Info */}
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600 px-2">
           <p>
             {currentLayer === 1 && 'Layer 1: Decision Identity'}
             {currentLayer === 2 && 'Layer 2: Execution Style Subtype'}

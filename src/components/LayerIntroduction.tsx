@@ -51,17 +51,14 @@ export function LayerIntroduction({ layerNumber, title, description1, descriptio
   const data = layerData[layerNumber] || { title, desc1: description1, desc2: description2 };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-full">
+    <div className="min-h-screen bg-white flex items-center justify-center py-4 sm:py-8 px-4">
+      <div className="w-full max-w-2xl mx-auto">
         {/* Main Card */}
         <div 
-          className="bg-white rounded-xl mx-auto flex flex-col items-center justify-center w-full px-4"
+          className="bg-white rounded-xl mx-auto flex flex-col items-center justify-center w-full"
           style={{
             border: '1px solid #9B4DCE',
-            padding: '40px 30px',
-            maxWidth: '600px',
-            minWidth: '320px',
-            marginTop: '60px',
+            padding: '24px 20px',
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
           }}
         >
@@ -69,39 +66,39 @@ export function LayerIntroduction({ layerNumber, title, description1, descriptio
           <div 
             className="rounded-full mx-auto"
             style={{
-              width: '80px',
-              height: '4px',
+              width: '60px',
+              height: '3px',
               background: 'linear-gradient(to right, var(--bs-color-indigo), var(--bs-color-orange))',
-              marginBottom: '24px'
+              marginBottom: '20px'
             }}
           />
           
           {/* Title */}
           <h2 
-            className="text-center uppercase font-bold text-[var(--bs-color-indigo)]"
+            className="text-center uppercase font-bold text-[var(--bs-color-indigo)] text-lg sm:text-xl md:text-2xl px-2"
             style={{ 
-              fontSize: '24px',
-              marginBottom: '16px'
+              marginBottom: '12px',
+              lineHeight: '1.3'
             }}
           >
             {data.title}
           </h2>
           
           {/* Description Text */}
-          <div className="text-center" style={{ marginBottom: '32px' }}>
+          <div className="text-center px-2 sm:px-4" style={{ marginBottom: '24px' }}>
             <p 
-              className="text-gray-700 mb-2"
+              className="text-gray-700 text-sm sm:text-base mb-2 sm:mb-3"
               style={{ 
-                lineHeight: '1.5',
+                lineHeight: '1.6',
                 marginBottom: '8px'
               }}
             >
               {data.desc1}
             </p>
             <p 
-              className="text-gray-700"
+              className="text-gray-700 text-sm sm:text-base"
               style={{ 
-                lineHeight: '1.5'
+                lineHeight: '1.6'
               }}
             >
               {data.desc2}
@@ -110,11 +107,12 @@ export function LayerIntroduction({ layerNumber, title, description1, descriptio
           
           {/* Button */}
           <button 
-            className="rounded-full text-white font-semibold flex items-center gap-2 transition-all"
+            className="rounded-full text-white font-semibold flex items-center gap-2 transition-all text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
             style={{
-              padding: '14px 32px',
               background: 'linear-gradient(to right, var(--bs-color-indigo), #C72170)',
-              marginTop: '20px'
+              marginTop: '16px',
+              width: 'auto',
+              minWidth: '200px'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'linear-gradient(to right, #5205a0, #d5287d)';
@@ -126,8 +124,8 @@ export function LayerIntroduction({ layerNumber, title, description1, descriptio
             }}
             onClick={onBegin}
           >
-            <span>Begin Layer {layerNumber} Assessment</span>
-            <ArrowRight className="w-5 h-5" />
+            <span className="whitespace-nowrap">Begin Layer {layerNumber} Assessment</span>
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
           </button>
         </div>
       </div>
