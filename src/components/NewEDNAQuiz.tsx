@@ -301,8 +301,14 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
                 onClick={handleNext}
                 disabled={!currentAnswer}
                 size="default"
-                className="w-full sm:!w-auto sm:!min-w-0 sm:!max-w-none bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
-                style={{ width: 'auto', minWidth: 'auto', maxWidth: 'none' }}
+                className="w-full sm:!w-auto sm:!min-w-0 sm:!max-w-none text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
+                style={{ 
+                  width: 'auto', 
+                  minWidth: 'auto', 
+                  maxWidth: 'none',
+                  backgroundColor: '#7C3AED',
+                  backgroundImage: 'none'
+                }}
               >
                 {currentLayer === 7 && currentQuestionIndex === currentQuestions.length - 1
                   ? 'Complete Quiz'

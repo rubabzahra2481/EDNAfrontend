@@ -32,7 +32,7 @@ export function AIMentorHub({ onViewChange, isInDashboard = false }: AIMentorHub
                   <Target className="w-6 h-6 text-purple-700" />
                 </div>
                 <div>
-                  <h3 className="typo-h3-bs mb-1">The AI Architect</h3>
+                  <h3 className="typo-h3-bs mb-1">Collaboration Mastery</h3>
                   <p className="typo-caption-bs text-gray-600">Logical • Data • Strategic</p>
                 </div>
               </div>
@@ -65,7 +65,7 @@ export function AIMentorHub({ onViewChange, isInDashboard = false }: AIMentorHub
                   <Lightbulb className="w-6 h-6 text-orange-700" />
                 </div>
                 <div>
-                  <h3 className="typo-h3-bs mb-1">The AI Alchemist</h3>
+                  <h3 className="typo-h3-bs mb-1">Decision Intelligence</h3>
                   <p className="typo-caption-bs text-gray-600">Creative • Energetic • Experimental</p>
                 </div>
               </div>

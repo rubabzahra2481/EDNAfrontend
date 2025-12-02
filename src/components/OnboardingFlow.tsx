@@ -111,8 +111,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {/* Assessment Benefits Box */}
           <div className="p-8 bg-white rounded-xl border-2 border-purple-100 shadow-sm">
             <div className="flex items-start gap-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Eye className="w-6 h-6 text-white" />
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-md"
+                style={{ backgroundColor: '#f6782f' }}
+              >
               </div>
               <div className="flex-1">
                 <h4 className="typo-h3-bs mb-4 text-gray-900">
@@ -143,8 +145,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {/* Closing Statement Box */}
           <div className="p-6 bg-white rounded-xl border-2 border-purple-100 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Brain className="w-6 h-6 text-white" />
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-md"
+                style={{ backgroundColor: '#42047d' }}
+              >
               </div>
               <div className="flex-1 pt-1">
                 <p className="typo-body-bs text-gray-800 font-semibold mb-2">
@@ -160,6 +164,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
            {/* EDNA Framework Diagram */}
            <div className="my-12 flex justify-center items-center">
              <div className="p-8 bg-white rounded-xl border-2 border-purple-100 shadow-sm hover:shadow-md transition-shadow w-full max-w-5xl">
+               <h3 className="typo-h3-bs mb-6 text-center" style={{
+                 backgroundImage: 'linear-gradient(to right, #42047d, #f6782f)',
+                 WebkitBackgroundClip: 'text',
+                 WebkitTextFillColor: 'transparent',
+                 backgroundClip: 'text'
+               }}>
+                 Decision Network
+               </h3>
                <img 
                  src={diagramFrame} 
                  alt="EDNA Framework Diagram" 
@@ -209,7 +221,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </p>
           
           <p className="text-base text-gray-600 mb-8" style={{ fontFamily: 'Inter, Poppins, sans-serif' }}>
-            Assessing your Decision Intelligence Network, will reveals how you as an entrepreneur thinks, feels and decides across 7 layers. it will show your
+          Assessing your Decision Intelligence Network, will reveal how you as an entrepreneur thinks, feels and decides across 7 layers. it will show your
           </p>
           
           {/* Layer Cards */}
@@ -307,8 +319,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {/* Assessment Purpose - GitHub style callout */}
           <div className="border-l-4 border-[var(--bs-color-indigo)] bg-blue-50 rounded-r-xl p-8">
             <div className="flex items-start gap-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Brain className="w-6 h-6 text-white" />
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-md"
+                style={{ backgroundColor: '#f6782f' }}
+              >
               </div>
               <div>
                 <h4 className="typo-h3-bs text-gray-900 mb-3">
@@ -389,8 +403,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {/* Why Your Honesty Matters - GitHub style note */}
           <div className="border border-gray-200 rounded-xl bg-white p-8">
             <div className="flex items-start gap-6 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] flex items-center justify-center flex-shrink-0 shadow-md">
-                <Eye className="w-6 h-6 text-white" />
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-md"
+                style={{ backgroundColor: '#42047d' }}
+              >
               </div>
               <h4 className="typo-h3-bs text-gray-900">
                 Why Your Honesty Matters

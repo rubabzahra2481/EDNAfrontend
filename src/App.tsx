@@ -123,9 +123,9 @@ export default function App() {
     return (
       <SignupPage
         onSuccess={() => {
-          // Mark that user just signed up - will redirect to quiz after auth
+          // Mark that user just signed up - will show onboarding flow after auth
           localStorage.setItem('justSignedUp', 'true');
-          // Clear onboarding flag so user sees "Welcome to Brandscaling"
+          // Clear onboarding flag so user sees the onboarding flow
           localStorage.removeItem('edna-onboarding-completed');
         }}
       />
@@ -242,16 +242,16 @@ export default function App() {
         });
         setIsAuthenticated(true);
         
-        // Check if user just signed up - redirect to quiz with onboarding
+        // Check if user just signed up - show onboarding first
         const justSignedUp = localStorage.getItem('justSignedUp') === 'true';
         if (justSignedUp) {
           localStorage.removeItem('justSignedUp');
-          // Clear onboarding flag so user sees "Welcome to Brandscaling"
+          // Clear onboarding flag so user sees the onboarding flow
           localStorage.removeItem('edna-onboarding-completed');
-          // Redirect to quiz and don't load results (user hasn't taken quiz yet)
-          setCurrentView('quiz');
+          // Show onboarding flow first, then quiz
+          setShowOnboarding(true);
           // Don't load quiz results for new signups - they need to take the quiz first
-          return; // Exit early to prevent dashboard redirect
+          return; // Exit early
         } else {
           // If user is authenticated and on home page, redirect to dashboard
           setCurrentView((prevView) => {
@@ -335,11 +335,12 @@ export default function App() {
       if (session?.user) {
         console.log('✅ Session restored for:', session.user.email);
         
-        // Check if user just signed up - don't redirect to dashboard
+        // Check if user just signed up - show onboarding first
         const justSignedUp = localStorage.getItem('justSignedUp') === 'true';
         if (justSignedUp) {
-          // User just signed up, keep them on quiz
+          // User just signed up, show onboarding flow
           localStorage.removeItem('justSignedUp');
+          // Clear onboarding flag so user sees the onboarding flow
           localStorage.removeItem('edna-onboarding-completed');
         setUser({
           email: session.user.email || '',
@@ -347,9 +348,9 @@ export default function App() {
             id: session.user.id,
         });
         setIsAuthenticated(true);
-          setCurrentView('quiz');
+          setShowOnboarding(true);
           setIsLoadingAuth(false);
-          return; // Exit early - don't load results or redirect
+          return; // Exit early - don't load results
         }
         
         setUser({
@@ -537,13 +538,13 @@ export default function App() {
     const wasJustSignedUp = justSignedUp || savedJustSignedUp;
     
     if (wasJustSignedUp) {
-      // Clear onboarding flag so user sees "Welcome to Brandscaling"
+      // Clear onboarding flag so user sees the onboarding flow
       localStorage.removeItem('edna-onboarding-completed');
       localStorage.removeItem('justSignedUp');
-      // Redirect to quiz - don't load results or redirect to dashboard
-      setCurrentView('quiz');
+      // Show onboarding flow first, then quiz
+      setShowOnboarding(true);
       setAuthMode('login'); // Reset auth mode
-      return; // Exit early - don't load quiz results or redirect to dashboard
+      return; // Exit early - don't load quiz results
     } else {
       // Immediately redirect to dashboard to avoid showing home page
       setCurrentView('dashboard');
@@ -712,19 +713,13 @@ export default function App() {
         return saved ? new Date(saved) : null;
       })();
       
-      // After signup/login, always go to dashboard (unless user just signed up)
+      // After signup/login, always go to dashboard
       // Dashboard will show EDNA Profile section (with prompt to take quiz if no results)
       const wasJustSignedUp = justSignedUp || savedJustSignedUp;
-      if (!wasJustSignedUp) {
-        console.log(
-          '✅ User authenticated, redirecting to dashboard',
-        );
-        setCurrentView('dashboard');
-      } else {
-        console.log(
-          '✅ User just signed up, staying on quiz with onboarding',
-        );
-      }
+      console.log(
+        '✅ User authenticated, redirecting to dashboard',
+      );
+      setCurrentView('dashboard');
     } else {
       // No email - show onboarding
       setShowOnboarding(true);
@@ -757,7 +752,8 @@ export default function App() {
     if (view === 'quiz' && !isAuthenticated && currentView === 'home') {
       // Show auth screen in register mode
       setAuthMode('register');
-      localStorage.setItem('justSignedUp', 'true'); // Mark for signup redirect
+      localStorage.setItem('justSignedUp', 'true'); // Mark that user is signing up from quiz button
+      localStorage.removeItem('edna-onboarding-completed'); // Clear flag so onboarding shows
       setShowAuth(true);
       return;
     }

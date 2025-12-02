@@ -676,11 +676,22 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       return;
     }
     
+    let progressInterval: NodeJS.Timeout | null = null;
+    
     try {
-      // Show loading state
+      // Show loading state with progress
+      const startTime = Date.now();
       if (button) {
-        button.textContent = 'Generating PDF...';
+        button.textContent = 'Generating PDF... (0s)';
         button.disabled = true;
+        
+        // Update progress every second
+        progressInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          if (button && button.textContent?.includes('Generating')) {
+            button.textContent = `Generating PDF... (${elapsed}s)`;
+          }
+        }, 1000);
       }
 
       console.log('📥 Requesting PDF generation from server...');
@@ -730,6 +741,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       
       console.log('✅ PDF downloaded successfully');
 
+      // Clear progress interval
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+
       // Reset button
       if (button) {
         button.textContent = originalText;
@@ -738,6 +754,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       
     } catch (error) {
       console.error('❌ Error downloading PDF:', error);
+      
+      // Clear progress interval
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       
       // Reset button
       if (button) {

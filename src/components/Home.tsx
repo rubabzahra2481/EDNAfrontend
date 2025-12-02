@@ -75,7 +75,7 @@ export function Home({ onViewChange }: HomeProps) {
                   <Target className="w-6 h-6 text-purple-700" />
                 </div>
                 <div>
-                  <h3 className="typo-h3-bs mb-1">The AI Architect</h3>
+                  <h3 className="typo-h3-bs mb-1">Decision Intelligence</h3>
                   <p className="typo-caption-bs text-gray-600">Logical • Structual • Data-Grounded</p>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function Home({ onViewChange }: HomeProps) {
                   <Lightbulb className="w-6 h-6 text-orange-700" />
                 </div>
                 <div>
-                  <h3 className="typo-h3-bs mb-1">The AI Alchemist</h3>
+                  <h3 className="typo-h3-bs mb-1">Collaboration Mastery</h3>
                   <p className="typo-caption-bs text-gray-600">Creative • Energetic • Intutive</p>
                 </div>
               </div>
