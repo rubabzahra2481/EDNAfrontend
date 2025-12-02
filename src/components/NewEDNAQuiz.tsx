@@ -25,8 +25,9 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [currentAnswer, setCurrentAnswer] = useState<string>('');
   const [layer1Result, setLayer1Result] = useState<string | null>(null);
-  const [showLayerIntroduction, setShowLayerIntroduction] = useState(false);
-  const [layerToIntroduce, setLayerToIntroduce] = useState<number | null>(null);
+  // Show Layer 1 introduction if onboarding was already completed (user returning to quiz)
+  const [showLayerIntroduction, setShowLayerIntroduction] = useState(hasSeenOnboarding);
+  const [layerToIntroduce, setLayerToIntroduce] = useState<number | null>(hasSeenOnboarding ? 1 : null);
   
   // Get current questions based on layer and layer1 result
   const getCurrentQuestions = () => {

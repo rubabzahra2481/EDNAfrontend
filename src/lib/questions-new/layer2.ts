@@ -14,6 +14,7 @@ export interface Layer2Question {
   }[];
 }
 
+
 // Architect Path Questions (Q9-Q16)
 export const layer2ArchitectQuestions: Layer2Question[] = [
   { 
@@ -51,13 +52,13 @@ export const layer2ArchitectQuestions: Layer2Question[] = [
   },
   { 
     id: 'L2_Q12', 
-    text: 'When something isn\'t working, I first:', 
+    text: 'When a project or task starts breaking down (delays, confusion, errors, or misalignment), my first instinct is to:', 
     path: 'architect', 
     options: [
-      { value: 'a', text: 'Zoom out and re-sequence the strategy.', score: 'planner' },
-      { value: 'b', text: 'Redesign or tighten the process.', score: 'operator' },
-      { value: 'c', text: 'Analyse variables and test alternatives.', score: 'analyst' },
-      { value: 'd', text: 'Re-align plan, process, and proof simultaneously.', score: 'ultimate' }
+      { value: 'a', text: 'Zoom out, rethink the overall plan, and re-sequence the steps so everything makes sense again.\n→ Strategy Reset', score: 'planner' },
+      { value: 'b', text: 'Tighten or redesign the workflow, system, or routine so things run smoothly again.\n→ Process Reset', score: 'operator' },
+      { value: 'c', text: 'Analyse what\'s causing the issue — look at the details, variables, or data — and test logical fixes.\n→ Analytical Reset', score: 'analyst' },
+      { value: 'd', text: 'Re-align everything at once: the plan, the process, and the data behind it.\n→ Full Structural Reset', score: 'ultimate' }
     ]
   },
   { 
@@ -206,14 +207,8 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'The clarity of the situation — the plan, the steps, or the logical framework that keeps things stable.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'The alignment of the situation — the vision, the emotional tone, or the creative spark that keeps things aligned.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'I protect the process: systems, routines, stability.', score: 'operator' },
-      { value: 'd', text: 'I protect the quality: details, aesthetic, emotional precision.', score: 'perfectionist' },
-      { value: 'e', text: 'I protect clarity: data, assumptions, structure.', score: 'analyst' },
-      { value: 'f', text: 'I protect people: emotional tone, relationships, energy.', score: 'empath' },
-      { value: 'g', text: 'I protect the whole structure (plan + systems + data).', score: 'architect_ultimate' },
-      { value: 'h', text: 'I protect the whole project (vision + quality + energy).', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'The alignment of the situation — the vision, the emotional tone, or the creative spark that keeps things aligned.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q10m',
@@ -221,14 +216,8 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'A structure — a roadmap, system, or model that gives the project shape and clarity.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'A spark — a vision, tone, or story that sets the emotional direction and meaning.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'A workflow or operational process.', score: 'operator' },
-      { value: 'd', text: 'The feel, tone, or aesthetic expression.', score: 'perfectionist' },
-      { value: 'e', text: 'A model, spreadsheet, or clarity map.', score: 'analyst' },
-      { value: 'f', text: 'Emotional alignment with people involved.', score: 'empath' },
-      { value: 'g', text: 'A unified structure of phases + systems + data.', score: 'architect_ultimate' },
-      { value: 'h', text: 'A unified energetic frame (story + expression + tone).', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'A spark — a vision, tone, or story that sets the emotional direction and meaning.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q11m',
@@ -236,14 +225,8 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'Bringing clarity — organising steps, structure, or details so things make sense.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'Maintaining alignment — shaping the vision, tone, or feeling so things stay true to the direction.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'I make operations smooth and predictable.', score: 'operator' },
-      { value: 'd', text: 'I refine details until they feel perfectly aligned.', score: 'perfectionist' },
-      { value: 'e', text: 'I remove uncertainty with clarity and data.', score: 'analyst' },
-      { value: 'f', text: 'I maintain emotional alignment in the group.', score: 'empath' },
-      { value: 'g', text: 'I synchronise strategy + systems + data.', score: 'architect_ultimate' },
-      { value: 'h', text: 'I synchronise vision + expression + energy.', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'Maintaining alignment — shaping the vision, tone, or feeling so things stay true to the direction.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q12m',
@@ -251,29 +234,17 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'Fix the structure — clarify the plan, tighten the workflow, or analyse what\'s going wrong.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'Reset the energy — shift the tone, refine the story, or reconnect to what feels true.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'I redesign or tighten the process.', score: 'operator' },
-      { value: 'd', text: 'I refine the expression or details.', score: 'perfectionist' },
-      { value: 'e', text: 'I analyse variables and test alternatives.', score: 'analyst' },
-      { value: 'f', text: 'I reset the emotional energy or dynamic.', score: 'empath' },
-      { value: 'g', text: 'I realign plan + process + proof.', score: 'architect_ultimate' },
-      { value: 'h', text: 'I re-harmonise narrative + expression + energy.', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'Reset the energy — shift the tone, refine the story, or reconnect to what feels true.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q13m',
     text: 'When I\'m trying to build momentum on a project (starting, staying focused, or speeding up), I find it easiest when:',
     path: 'mixed',
     options: [
-      { value: 'a', text: 'The structure is clear — I know the next steps, the workflow feels organised, or the data shows I\'m moving in the right direction.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'The feeling is right — the idea clicks, the energy lifts, or the quality inspires me to move.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'A smooth-running system energises me.', score: 'operator' },
-      { value: 'd', text: 'When the quality feels right, momentum returns.', score: 'perfectionist' },
-      { value: 'e', text: 'Data confirming clarity drives me forward.', score: 'analyst' },
-      { value: 'f', text: 'An aligned emotional field lifts my energy.', score: 'empath' },
-      { value: 'g', text: 'When structure (plan + system + metrics) clicks.', score: 'architect_ultimate' },
-      { value: 'h', text: 'When idea + quality + energy reinforce each other.', score: 'alchemist_ultimate' },
-    ],
+      { value: 'a', text: 'The structure is clear — tI know the next steps, the workflow feels organised, or the data shows I\'m moving in the right direction.\n→ Logic-led', score: 'planner' },
+      { value: 'b', text: 'The feeling is right — the idea clicks, the energy lifts, or the quality inspires me to move.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q14m',
@@ -281,14 +252,8 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'The structure is working — the steps are unfolding clearly, things are becoming more organised, or the data shows improvement.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'The alignment is working — the idea feels more real, the tone feels right, or the emotional flow is strengthening.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'When operations become stable and reliable.', score: 'operator' },
-      { value: 'd', text: 'When the quality feels emotionally precise.', score: 'perfectionist' },
-      { value: 'e', text: 'When data shows measurable progress.', score: 'analyst' },
-      { value: 'f', text: 'When the people involved feel aligned.', score: 'empath' },
-      { value: 'g', text: 'When plan + process + proof are in sync.', score: 'architect_ultimate' },
-      { value: 'h', text: 'When vision + expression + energy align perfectly.', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'The alignment is working — the idea feels more real, the tone feels right, or the emotional flow is strengthening.\n→ Intuition-led', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q15m',
@@ -296,14 +261,8 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'When the structure feels unclear — the steps, systems, or information don\'t make sense yet.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'When the direction feels off — the idea doesn\'t feel right, the tone feels wrong, or the emotional flow is disrupted.\n→ Intuition-led.', score: 'oracle' },
-      { value: 'c', text: 'Broken or undefined processes slow me down.', score: 'operator' },
-      { value: 'd', text: 'Aesthetic or emotional misalignment slows me down.', score: 'perfectionist' },
-      { value: 'e', text: 'Lack of clarity, data, or validation slows me down.', score: 'analyst' },
-      { value: 'f', text: 'Low emotional energy or tension slows me down.', score: 'empath' },
-      { value: 'g', text: 'Structural misalignment slows me down.', score: 'architect_ultimate' },
-      { value: 'h', text: 'Misalignment of vision + quality + energy slows me down.', score: 'alchemist_ultimate' },
-    ],
+      { value: 'b', text: 'When the direction feels off — the idea doesn\'t feel right, the tone feels wrong, or the emotional flow is disrupted.\n→ Intuition-led.', score: 'oracle' }
+    ]
   },
   {
     id: 'L2_Q16m',
@@ -311,13 +270,7 @@ export const layer2MixedQuestions: Layer2Question[] = [
     path: 'mixed',
     options: [
       { value: 'a', text: 'Whether the structure still holds — the logic, systems, processes, and information all line up clearly.\n→ Logic-led', score: 'planner' },
-      { value: 'b', text: 'Whether the direction still feels right — the idea, the vision, the quality, and the emotional tone are fully aligned.\n→ Intuition-led', score: 'oracle' },
-      { value: 'c', text: 'I check if the system can hold it.', score: 'operator' },
-      { value: 'd', text: 'I check if the quality feels aligned.', score: 'perfectionist' },
-      { value: 'e', text: 'I check if the data and assumptions are solid.', score: 'analyst' },
-      { value: 'f', text: 'I check if the emotional tone feels right.', score: 'empath' },
-      { value: 'g', text: 'I check if structure is aligned end-to-end.', score: 'architect_ultimate' },
-      { value: 'h', text: 'I check if story + quality + energy anchor together.', score: 'alchemist_ultimate' },
-    ],
-  },
+      { value: 'b', text: 'Whether the direction still feels right — the idea, the vision, the quality, and the emotional tone are fully aligned.\n→ Intuition-led', score: 'oracle' }
+    ]
+  }
 ];
