@@ -525,10 +525,10 @@ export function calculateLayer7(answers: UserAnswers): Layer7Result {
   // Client's exact mapping based on question ID and answer value
   const q40Map: { [key: string]: string } = { 'a': 'Self-Reliant', 'b': 'Faith-Reliant', 'c': 'Dual-Reliant' };
   const q41Map: { [key: string]: string } = { 'a': "I'm In Control", 'b': 'Life Influences Me', 'c': 'Shared Control' };
-  const q42Map: { [key: string]: string } = { 'a': 'Responsibility View', 'b': 'Compassion View', 'c': 'Balanced View' };
+  const q42Map: { [key: string]: string } = { 'a': 'Responsibility View', 'b': 'Compassion', 'c': 'Balanced View' };
   const q43Map: { [key: string]: string } = { 'a': 'Direct Honesty', 'b': 'Gentle Honesty', 'c': 'Balanced Honesty' };
   const q44Map: { [key: string]: string } = { 'a': 'Growth Focused', 'b': 'Comfort Focused', 'c': 'Steady Growth' };
-  const q45Map: { [key: string]: string } = { 'a': 'Self-Focused Impact', 'b': 'Others-Focused Impact', 'c': 'Shared Impact' };
+  const q45Map: { [key: string]: string } = { 'a': 'Self-Focused', 'b': 'Others-Focused Impact', 'c': 'Shared Impact' };
 
   const questionMap: { [key: string]: { [key: string]: string } } = {
     'L7_Q40': q40Map,
