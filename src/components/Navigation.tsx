@@ -14,10 +14,21 @@ interface NavigationProps {
   isAuthenticated: boolean;
   onAuthToggle: () => void;
   isSticky?: boolean;
+  dashboardMenuItems?: Array<{ id: string; label: string; icon: any; view: string; disabled?: boolean }>;
+  activeDashboardView?: string;
+  onDashboardViewChange?: (view: string) => void;
+  onMobileMenuToggle?: (isOpen: boolean) => void;
+  onLogoClick?: () => void; // Optional custom handler for logo click
 }
 
-export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthToggle, isSticky = false }: NavigationProps) {
+export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthToggle, isSticky = false, dashboardMenuItems, activeDashboardView, onDashboardViewChange, onMobileMenuToggle, onLogoClick }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Notify parent when menu state changes
+  const handleMenuToggle = (open: boolean) => {
+    setIsMobileMenuOpen(open);
+    onMobileMenuToggle?.(open);
+  };
 
   const navItems = [
     // Hide Home and About when user is authenticated
@@ -54,7 +65,13 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <button
-                onClick={() => onViewChange('home')}
+                onClick={() => {
+                  if (onLogoClick) {
+                    onLogoClick();
+                  } else {
+                    onViewChange('home');
+                  }
+                }}
                 className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 aria-label="Brandscaling Home"
               >
@@ -110,16 +127,18 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          {/* Mobile Menu Button - Only show on home page or dashboard (or when authenticated on home, which shows dashboard) */}
+          {(currentView === 'home' || currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) && (
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => handleMenuToggle(!isMobileMenuOpen)}
+                className="p-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -127,7 +146,34 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <div className="px-4 py-3 space-y-2">
-            {/* Only show navigation buttons on home page when not authenticated */}
+            {/* Dashboard menu - Show on mobile dashboard view OR when authenticated on results page (home view with dashboard) */}
+            {((currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) && dashboardMenuItems) && dashboardMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeDashboardView === item.view;
+              const isDisabled = item.disabled === true;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (isDisabled) return;
+                    onDashboardViewChange?.(item.view);
+                    handleMenuToggle(false);
+                  }}
+                  disabled={isDisabled}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] text-white'
+                      : isDisabled
+                      ? 'text-gray-400 cursor-not-allowed opacity-50'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="typo-body-bs font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+            {/* Navigation menu - ONLY show on home page when NOT authenticated */}
             {currentView === 'home' && !isAuthenticated && navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
@@ -141,36 +187,7 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
                       return; // Prevent navigation to dashboard on mobile
                     }
                     onViewChange(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  disabled={isDashboard}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[var(--bs-color-indigo)] to-[var(--bs-color-orange)] text-white'
-                      : isDashboard
-                      ? 'text-gray-400 cursor-not-allowed opacity-50'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="typo-body-bs font-medium">{item.label}</span>
-                </button>
-              );
-            })}
-            {/* Show authenticated menu items but disable Dashboard */}
-            {isAuthenticated && navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-              const isDashboard = item.id === 'dashboard';
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (isDashboard) {
-                      return; // Prevent navigation to dashboard on mobile
-                    }
-                    onViewChange(item.id);
-                    setIsMobileMenuOpen(false);
+                    handleMenuToggle(false);
                   }}
                   disabled={isDashboard}
                   className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
@@ -194,7 +211,7 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
                   variant="outline"
                   onClick={() => {
                     onAuthToggle();
-                    setIsMobileMenuOpen(false);
+                    handleMenuToggle(false);
                   }}
                   className="w-full h-[var(--bs-cta-height)] border-2 border-[var(--bs-color-indigo)] text-[var(--bs-color-indigo)]"
                 >
@@ -205,7 +222,7 @@ export function Navigation({ currentView, onViewChange, isAuthenticated, onAuthT
                 <button
                   onClick={() => {
                     onAuthToggle();
-                    setIsMobileMenuOpen(false);
+                    handleMenuToggle(false);
                   }}
                   className="cta-gradient-bs w-full flex items-center justify-center gap-2"
                 >

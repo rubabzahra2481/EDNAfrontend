@@ -26,6 +26,7 @@ import { checkBackendStatus } from './utils/supabase/backend-status';
 import { BACKEND_URL, GHL_CHECKOUT_URL } from './config';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { clearAgentToken } from './utils/agentToken';
+import { User, FileText, MessageSquare, BookOpen } from 'lucide-react';
 
 interface User {
   email: string;
@@ -150,6 +151,8 @@ export default function App() {
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [showShortResults, setShowShortResults] = useState(false);
+  const [activeDashboardView, setActiveDashboardView] = useState<string>('profile');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const showShortResultsRef = useRef(false);
   const [quizCompletedAt, setQuizCompletedAt] = useState<Date | null>(null);
 
@@ -259,6 +262,37 @@ export default function App() {
           });
         }
 
+        // Check localStorage first for immediate results (before async backend call)
+        if (session.user.email) {
+          const normalizedEmail = session.user.email.toLowerCase().trim();
+          const savedResults = localStorage.getItem(`quizResults_${normalizedEmail}`);
+          const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
+          
+          if (savedResults) {
+            try {
+              const results = JSON.parse(savedResults);
+              if (results && results.core_type) {
+                setQuizResults(results);
+                console.log('✅ Restored quiz results from localStorage immediately (auth change)');
+                
+                if (savedQuizCompletedAt) {
+                  try {
+                    const completedDate = new Date(savedQuizCompletedAt);
+                    if (!isNaN(completedDate.getTime())) {
+                      setQuizCompletedAt(completedDate);
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }
+              }
+            } catch (e) {
+              console.error('Failed to parse saved results:', e);
+            }
+          }
+        }
+        
+        // Then try to load from backend (will update if newer data exists)
         if (session.user.email) {
           await loadUserQuizResults(session.user.email).catch((err) => {
             console.log(
@@ -325,11 +359,42 @@ export default function App() {
         });
         setIsAuthenticated(true);
         
+        // Check localStorage first for immediate results (before async backend call)
+        if (session.user.email) {
+          const normalizedEmail = session.user.email.toLowerCase().trim();
+          const savedResults = localStorage.getItem(`quizResults_${normalizedEmail}`);
+          const savedQuizCompletedAt = localStorage.getItem('quizCompletedAt');
+          
+          if (savedResults) {
+            try {
+              const results = JSON.parse(savedResults);
+              if (results && results.core_type) {
+                setQuizResults(results);
+                console.log('✅ Restored quiz results from localStorage immediately');
+                
+                if (savedQuizCompletedAt) {
+                  try {
+                    const completedDate = new Date(savedQuizCompletedAt);
+                    if (!isNaN(completedDate.getTime())) {
+                      setQuizCompletedAt(completedDate);
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }
+              }
+            } catch (e) {
+              console.error('Failed to parse saved results:', e);
+            }
+          }
+        }
+        
         // If user is authenticated and on home page, redirect to dashboard
         if (currentView === 'home') {
           setCurrentView('dashboard');
         }
 
+        // Then try to load from backend (will update if newer data exists)
         if (session.user.email) {
           await loadUserQuizResults(session.user.email).catch((err) => {
             console.log(
@@ -992,7 +1057,26 @@ export default function App() {
         onViewChange={handleViewChange}
         isAuthenticated={isAuthenticated}
         onAuthToggle={handleAuthToggle}
-        isSticky={currentView === 'dashboard'}
+        isSticky={currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)}
+        dashboardMenuItems={(currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) ? [
+          { id: 'profile', label: 'EDNA Profile', icon: User, view: 'profile' },
+          { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: true },
+          { id: 'chat', label: 'AI Mentor', icon: MessageSquare, view: 'chat' },
+          { id: 'courses', label: 'Courses', icon: BookOpen, view: 'courses', disabled: true },
+        ] : undefined}
+        activeDashboardView={(currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) ? activeDashboardView : undefined}
+        onDashboardViewChange={(currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) ? setActiveDashboardView : undefined}
+        onMobileMenuToggle={setIsMobileMenuOpen}
+        onLogoClick={() => {
+          if (isAuthenticated) {
+            // Navigate to dashboard and set EDNA Profile as active view
+            setCurrentView('dashboard');
+            setActiveDashboardView('profile');
+          } else {
+            // Navigate to home for non-authenticated users
+            handleViewChange('home');
+          }
+        }}
       />
       
       {currentView === 'home' && !isAuthenticated && <Home onViewChange={handleViewChange} />}
@@ -1004,6 +1088,9 @@ export default function App() {
           userEmail={user?.email || ''}
           onViewChange={handleViewChange}
           quizCompletedAt={quizCompletedAt}
+          activeDashboardView={activeDashboardView}
+          onDashboardViewChange={setActiveDashboardView}
+          isMobileMenuOpen={isMobileMenuOpen}
         />
       )}
       
@@ -1095,6 +1182,9 @@ export default function App() {
           userEmail={user?.email || ''}
           onViewChange={handleViewChange}
           quizCompletedAt={quizCompletedAt}
+          activeDashboardView={activeDashboardView}
+          onDashboardViewChange={setActiveDashboardView}
+          isMobileMenuOpen={isMobileMenuOpen}
         />
       )}
       

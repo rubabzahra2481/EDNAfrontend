@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { EDNAResults } from '../lib/scoring';
 import { Home, ChevronLeft, ChevronRight, BookOpen, Brain, MessageSquare, FileText, User } from 'lucide-react';
 import brandscalingLogo from 'figma:asset/4ffc1593ac524b5a444c05cca1a8149a7e87be86.png';
@@ -6,6 +6,7 @@ import { Courses } from './Courses';
 import { AIMentorHub } from './AIMentorHub';
 import { Workbooks } from './Workbooks';
 import { BACKEND_URL } from '../config';
+import { useIsMobile } from './ui/use-mobile';
 
 interface CompleteResultsPageProps {
   results?: EDNAResults | null;
@@ -14,11 +15,34 @@ interface CompleteResultsPageProps {
   onViewChange?: (view: string) => void;
   quizCompletedAt?: Date | null;
   isStandalone?: boolean; // If true, render as standalone page without sidebar. If false, render inside dashboard with sidebar.
+  onDashboardViewChange?: (view: string) => void; // Callback for dashboard view changes (for mobile menu)
+  activeDashboardView?: string; // Current active dashboard view (for mobile menu)
+  isMobileMenuOpen?: boolean; // Whether the mobile menu is open (for adjusting content position)
 }
 
-export function CompleteResultsPage({ results, userEmail, onGetFullReport, onViewChange, quizCompletedAt, isStandalone = false }: CompleteResultsPageProps) {
+export function CompleteResultsPage({ results, userEmail, onGetFullReport, onViewChange, quizCompletedAt, isStandalone = false, onDashboardViewChange, activeDashboardView: externalActiveView, isMobileMenuOpen = false }: CompleteResultsPageProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeView, setActiveView] = useState<string>('profile'); // Always default to EDNA Profile section
+  const [activeView, setActiveView] = useState<string>(externalActiveView || 'profile'); // Always default to EDNA Profile section
+  const isMobile = useIsMobile();
+  
+  // Calculate mobile menu height (approximately 280px for dashboard menu with 4 items + auth button)
+  // Each item: ~50px (py-3 = 12px top + 12px bottom + ~26px content) + padding
+  // Only apply on mobile devices, not desktop
+  const mobileMenuHeight = (isMobile && isMobileMenuOpen) ? 280 : 0;
+  
+  // Sync external activeView if provided - always update when it changes
+  useEffect(() => {
+    if (externalActiveView !== undefined && externalActiveView !== null) {
+      setActiveView(externalActiveView);
+    }
+  }, [externalActiveView]);
+  
+  // Update activeView and notify parent
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    onDashboardViewChange?.(view);
+  };
+
   
   // Sidebar menu items - EDNA Profile shows message if no results
   const sidebarMenuItems = [
@@ -33,14 +57,14 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   const Sidebar = () => {
     return (
     <aside
-      className="fixed left-0 flex flex-col hide-scrollbar"
+      className="hidden md:flex fixed left-0 flex-col hide-scrollbar"
       style={{ 
         position: 'fixed', // Fixed positioning to stay connected to navbar
         top: '70px', // Start directly below navbar (64px nav + 6px gradient stripe)
         left: '0px', // Explicitly set left position
         width: isSidebarCollapsed ? '72px' : '260px',
-        height: 'calc(100vh - 70px)',
-        maxHeight: 'calc(100vh - 70px)', // Ensure it doesn't exceed viewport
+        height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
+        maxHeight: `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Ensure it doesn't exceed viewport
         background: '#ffffff',
         borderRight: '1px solid rgba(0, 0, 0, 0.06)',
         overflowY: 'auto',
@@ -150,7 +174,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
                     // Skip if disabled
                     if (isDisabled) return;
                     // Always update local state to show content within dashboard
-                    setActiveView(item.view);
+                    handleViewChange(item.view);
                   }}
                   disabled={isDisabled}
                   className={`w-full flex items-center gap-3 rounded-md transition-all duration-150 group relative ${
@@ -206,7 +230,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       case 'courses':
         return (
           <div className="w-full h-full overflow-y-auto bg-gray-50">
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
               <Courses onViewChange={onViewChange || (() => {})} isAuthenticated={true} />
             </div>
           </div>
@@ -219,49 +243,50 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         );
       case 'workbooks':
         return (
-          <div className="w-full h-full bg-gray-50">
+          <div className="w-full h-full bg-gray-50 px-4 sm:px-6">
             <Workbooks onViewChange={onViewChange} />
           </div>
         );
       case 'profile':
-        if (!results) {
-          // No results - show "Take Quiz" prompt
-          // Cooldown check is handled in App.tsx when clicking the quiz button
-          return (
-            <div className="max-w-4xl mx-auto w-full bg-gray-50 px-4 sm:px-6">
-              <div className="bg-white border-2 border-gray-200 rounded-xl p-6 sm:p-8 md:p-12 text-center shadow-lg">
-                <div className="mb-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-4" style={{
-                    background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)'
-                  }}>
-                    <Brain className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{
-                    backgroundImage: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}>
-                    No E-DNA Profile Yet
-                  </h2>
-                  <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-                    Complete the E-DNA assessment to unlock your personalized profile, insights, and recommendations.
-                  </p>
-                  <button
-                    onClick={() => {
-                      onViewChange?.('quiz');
-                    }}
-                    className="cta-gradient-bs px-8 inline-flex items-center gap-2"
-                  >
-                    <span>Take E-DNA Quiz</span>
-                  </button>
+        // Always show results if they exist, otherwise show "Take Quiz" prompt
+        if (results) {
+          // Results exist - return null to let the outer renderContent section show the full results page
+          return null;
+        }
+        // No results - show "Take Quiz" prompt
+        // Cooldown check is handled in App.tsx when clicking the quiz button
+        return (
+          <div className="max-w-4xl mx-auto w-full bg-gray-50 px-4 sm:px-6">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-6 sm:p-8 md:p-12 text-center shadow-lg">
+              <div className="mb-6">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-4" style={{
+                  background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)'
+                }}>
+                  <Brain className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
                 </div>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{
+                  backgroundImage: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  No E-DNA Profile Yet
+                </h2>
+                <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
+                  Complete the E-DNA assessment to unlock your personalized profile, insights, and recommendations.
+                </p>
+                <button
+                  onClick={() => {
+                    onViewChange?.('quiz');
+                  }}
+                  className="cta-gradient-bs px-8 inline-flex items-center gap-2"
+                >
+                  <span>Take E-DNA Quiz</span>
+                </button>
               </div>
             </div>
-          );
-        }
-        // Return null here - the results page content will be rendered below
-        return null;
+          </div>
+        );
       default:
         return (
           <div className="max-w-4xl mx-auto w-full text-center py-8 sm:py-12 px-4">
@@ -288,14 +313,15 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         className="bg-gray-50" 
         style={{ 
           fontFamily: 'Inter, sans-serif',
-          height: 'calc(100vh - 70px)',
+          height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
           overflow: 'hidden',
           position: 'fixed',
-          top: '70px', // Start below navbar
+          top: `calc(70px + ${mobileMenuHeight}px)`, // Start below navbar + menu height
           left: 0,
           right: 0,
           bottom: 0,
-          width: '100%'
+          width: '100%',
+          transition: 'top 300ms ease, height 300ms ease'
         }}
       >
         {/* COLLAPSIBLE SIDEBAR */}
@@ -306,12 +332,12 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className={`flex flex-col bg-gray-50 md:ml-[260px] ${isSidebarCollapsed ? 'md:ml-[72px]' : ''}`}
           style={{ 
-            marginTop: '70px', // Account for topbar height (64px nav + 6px gradient)
+            marginTop: '0px', // No margin needed since parent is positioned
             padding: activeView === 'profile' ? '20px 16px' : '0',
-            height: 'calc(100vh - 70px)',
+            height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
             overflow: activeView === 'profile' ? 'auto' : 'hidden', // Allow scroll for profile view
-            transition: 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 300ms ease',
-            willChange: 'margin-left, padding',
+            transition: 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 300ms ease, height 300ms ease',
+            willChange: 'margin-left, padding, height',
             transform: 'translateZ(0)', // Force GPU acceleration
             backfaceVisibility: 'hidden', // Prevent flickering
             WebkitTransform: 'translateZ(0)', // Safari GPU acceleration
@@ -789,13 +815,13 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
-            marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
+            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
+            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            willChange: isStandalone ? 'auto' : 'margin-left',
+            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
+            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
             transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
             backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
             WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
@@ -1590,13 +1616,13 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
-            marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
+            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
+            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            willChange: isStandalone ? 'auto' : 'margin-left',
+            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
+            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
             transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
             backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
             WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
@@ -2381,13 +2407,13 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
-            marginTop: isStandalone ? '0' : '70px', // Account for topbar height (64px nav + 6px gradient) only if not standalone
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
+            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : 'calc(100vh - 70px)', // Fixed height for dashboard mode
+            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
             overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            willChange: isStandalone ? 'auto' : 'margin-left',
+            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
+            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
             transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
             backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
             WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
@@ -3109,11 +3135,11 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       <div 
         className="flex flex-col bg-gray-50"
         style={{ 
-          marginLeft: isSidebarCollapsed ? '72px' : '260px',
-          marginTop: '70px', // Account for topbar height (64px nav + 6px gradient)
-          height: 'calc(100vh - 70px)',
+          marginLeft: isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
+          marginTop: `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
+          height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
           overflow: 'auto',
-          transition: 'margin-left 400ms cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'margin-left 400ms cubic-bezier(0.4, 0, 0.2, 1), margin-top 300ms ease, height 300ms ease'
         }}
       >
         {/* HEADER SECTION - HIDDEN IN DASHBOARD */}
