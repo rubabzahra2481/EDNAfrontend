@@ -256,7 +256,7 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
               Question {globalQuestionNumber} of {totalQuestions}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 sm:p-6 md:p-8">
+          <CardContent className="!px-4 sm:!px-6 md:!px-8 !py-4 sm:!py-6 md:!py-8">
             <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-4 sm:mb-6 text-gray-800">
               {currentQuestion.text}
             </h3>
@@ -286,12 +286,14 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
             </RadioGroup>
 
             {/* Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 sm:mt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 mt-6 sm:mt-8">
               <Button
                 onClick={handlePrevious}
                 disabled={currentLayer === 1 && currentQuestionIndex === 0}
                 variant="outline"
-                className="flex items-center justify-center gap-2 w-full sm:w-auto text-sm sm:text-base"
+                size="default"
+                className="w-full sm:!w-auto sm:!min-w-0 sm:!max-w-none border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-purple-600"
+                style={{ width: 'auto', minWidth: 'auto', maxWidth: 'none' }}
               >
                 <ChevronLeft className="w-4 h-4" />
                 Previous
@@ -300,7 +302,9 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
               <Button
                 onClick={handleNext}
                 disabled={!currentAnswer}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-sm sm:text-base"
+                size="default"
+                className="w-full sm:!w-auto sm:!min-w-0 sm:!max-w-none bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md"
+                style={{ width: 'auto', minWidth: 'auto', maxWidth: 'none' }}
               >
                 {currentLayer === 7 && currentQuestionIndex === currentQuestions.length - 1
                   ? 'Complete Quiz'
