@@ -3670,14 +3670,20 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             Neurodiversity
           </div>
           <div className="p-6">
-            <h4 className={`font-bold text-purple-900 mb-2`}>Neurodivergent</h4>
-            <p className="text-sm mb-2">
-              You may prefer short, engaging bursts of activity and sometimes struggle with sustained focus or time management. 
-              If intense, this could suggest probable signs of ADHD-related patterns in how you focus, shift attention, or need stimulation.
-            </p>
-            <p className="text-xs text-gray-500 italic">
-              *This is just a screening test to better understand possible neurodivergent traits*
-            </p>
+            {(() => {
+              const neuroInfo = getNeurodiversityInfo(neurodiversity, layer5Result);
+              return (
+                <>
+                  <h4 className={`font-bold text-purple-900 mb-2`}>{neuroInfo.classification}</h4>
+                  <p className="text-sm mb-2">
+                    {neuroInfo.description}
+                  </p>
+                  <p className="text-xs text-gray-500 italic">
+                    *This is a screening assessment to better understand your cognitive patterns*
+                  </p>
+                </>
+              );
+            })()}
           </div>
         </div>
 
