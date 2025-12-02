@@ -47,7 +47,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   // Sidebar menu items - EDNA Profile shows message if no results
   const sidebarMenuItems = [
     { id: 'profile', label: 'EDNA Profile', icon: User, view: 'profile', hasResults: !!results },
-    { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: true }, // Disabled for now
+    { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: false },
     { id: 'chat', label: 'AI Mentor', icon: MessageSquare, view: 'chat' },
     { id: 'courses', label: 'Courses', icon: BookOpen, view: 'courses', disabled: true }, // Disabled for now, will be enabled later
   ];
@@ -115,46 +115,6 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             pointerEvents: isSidebarCollapsed ? 'auto' : 'none'
           }} 
         />
-        <button
-          onClick={(e) => {
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
-            if (isMobile) {
-              e.preventDefault();
-              e.stopPropagation();
-              return;
-            }
-            // Small delay to ensure transition is applied in both directions
-            const newState = !isSidebarCollapsed;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                setIsSidebarCollapsed(newState);
-              });
-            });
-          }}
-          className="p-1.5 rounded-md transition-all duration-200 flex-shrink-0 hover:bg-gray-100 md:cursor-pointer cursor-not-allowed opacity-50 md:opacity-100 pointer-events-none md:pointer-events-auto"
-          style={{ 
-            color: '#6b7280'
-          }}
-          onMouseEnter={(e) => {
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
-            if (!isMobile) {
-              e.currentTarget.style.color = '#374151';
-            }
-          }}
-          onMouseLeave={(e) => {
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
-            if (!isMobile) {
-              e.currentTarget.style.color = '#6b7280';
-            }
-          }}
-          aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isSidebarCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
       </div>
 
       {/* Sidebar Menu - Clean spacing and design */}
@@ -242,9 +202,43 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
           </div>
         );
       case 'workbooks':
+        // Show overlay if no results
+        if (!results) {
+          return (
+            <div className="flex items-center justify-center h-full bg-gray-50">
+              <div className="text-center px-4 py-8 max-w-md">
+                <div className="mb-6">
+                  <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <h2 className="text-2xl font-bold mb-2" style={{
+                    backgroundImage: 'linear-gradient(to right, #42047d, #f6782f)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
+                    No Workbooks Available Yet
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    Complete your E-DNA assessment to unlock your personalized Decision Mastery Workbook
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (onViewChange) {
+                      onViewChange('quiz');
+                    }
+                  }}
+                  className="cta-gradient-bs px-8 py-3"
+                >
+                  Take E-DNA Quiz
+                </button>
+              </div>
+            </div>
+          );
+        }
+        // Show workbooks if results exist
         return (
-          <div className="w-full h-full bg-gray-50 px-4 sm:px-6">
-            <Workbooks onViewChange={onViewChange} />
+          <div className="w-full h-full overflow-y-auto bg-gray-50">
+            <Workbooks onViewChange={onViewChange} coreType={core_type} />
           </div>
         );
       case 'profile':
@@ -330,12 +324,12 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
         {/* MAIN CONTENT AREA */}
         <div 
-          className={`flex flex-col bg-gray-50 md:ml-[260px] ${isSidebarCollapsed ? 'md:ml-[72px]' : ''}`}
+          className="flex flex-col bg-gray-50 md:ml-[260px]"
           style={{ 
             marginTop: '0px', // No margin needed since parent is positioned
             padding: activeView === 'profile' ? '20px 16px' : '0',
             height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
-            overflow: activeView === 'profile' ? 'auto' : 'hidden', // Allow scroll for profile view
+            overflow: 'hidden', // Child components handle their own scrolling
             transition: 'margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 300ms ease, height 300ms ease',
             willChange: 'margin-left, padding, height',
             transform: 'translateZ(0)', // Force GPU acceleration
@@ -816,31 +810,40 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   // Helper function to determine Mixed type classification
   const getMixedTypeClassification = (resultsData: any) => {
     const typedResults = resultsData as any;
-    // Check if we have normalized scores from layer1
+    
+    // First, check if we have Layer 2 subtype (most accurate)
+    if (layer2Result?.subtype) {
+      const subtype = layer2Result.subtype;
+      
+      if (subtype === 'Architect-like') {
+        return {
+          classification: 'Architect-like',
+          description: 'You are more dominant on your logical side'
+        };
+      } else if (subtype === 'Alchemist-like') {
+        return {
+          classification: 'Alchemist-like',
+          description: 'You are more aligned with your emotional side'
+        };
+      }
+      // Note: "Blended" type has been removed - only Architect-like or Alchemist-like exist
+    }
+    
+    // Fallback: Check if we have normalized scores from layer1
     const normalizedScores = typedResults?.normalized_scores || 
                              (typedResults as any)?.raw_scores?.normalized_scores;
     
     if (normalizedScores) {
       const architectScore = normalizedScores.architect || 0;
       const alchemistScore = normalizedScores.alchemist || 0;
-      const diff = Math.abs(architectScore - alchemistScore);
       
-      // If difference is less than 10%, it's Blended
-      if (diff < 10) {
-        return {
-          classification: 'Blended',
-          description: 'You act with both logic and emotion but may struggle to find the balance'
-        };
-      }
-      // If architect score is higher, it's Architect-like
-      else if (architectScore > alchemistScore) {
+      // Determine based on which score is higher
+      if (architectScore > alchemistScore) {
         return {
           classification: 'Architect-like',
           description: 'You are more dominant on your logical side'
         };
-      }
-      // Otherwise, it's Alchemist-like
-      else {
+      } else {
         return {
           classification: 'Alchemist-like',
           description: 'You are more aligned with your emotional side'
@@ -848,11 +851,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       }
     }
     
-    // Fallback: check core_type_mastery or other indicators
-    // Default to Blended if we can't determine
+    // Final fallback - default to Architect-like
     return {
-      classification: 'Blended',
-      description: 'You act with both logic and emotion but may struggle to find the balance'
+      classification: 'Architect-like',
+      description: 'You are more dominant on your logical side'
     };
   };
 
@@ -904,15 +906,27 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       calculatedBeliefs = layer7Result.layer7.beliefs;
     }
     
-    // If we have calculated beliefs, use them directly
+    // If we have calculated beliefs, use them directly and clean up labels
     if (calculatedBeliefs) {
+      const cleanLabel = (value: string) => {
+        // Remove "View" suffix from Fairness View values
+        if (value.endsWith(' View')) {
+          return value.replace(' View', '');
+        }
+        // Remove "Impact" suffix from Impact Motivation values
+        if (value.endsWith(' Impact')) {
+          return value.replace(' Impact', '');
+        }
+        return value;
+      };
+      
       return {
-        faithOrientation: calculatedBeliefs['Grounding Source'] || calculatedBeliefs['GroundingSource'] || '',
-        controlOrientation: calculatedBeliefs['Control Belief'] || calculatedBeliefs['ControlBelief'] || '',
-        fairnessView: calculatedBeliefs['Fairness View'] || calculatedBeliefs['FairnessView'] || '',
-        integrityStyle: calculatedBeliefs['Honesty Style'] || calculatedBeliefs['HonestyStyle'] || '',
-        growthPreference: calculatedBeliefs['Growth Approach'] || calculatedBeliefs['GrowthApproach'] || '',
-        impactPreference: calculatedBeliefs['Impact Motivation'] || calculatedBeliefs['ImpactMotivation'] || ''
+        faithOrientation: cleanLabel(calculatedBeliefs['Grounding Source'] || calculatedBeliefs['GroundingSource'] || ''),
+        controlOrientation: cleanLabel(calculatedBeliefs['Control Belief'] || calculatedBeliefs['ControlBelief'] || ''),
+        fairnessView: cleanLabel(calculatedBeliefs['Fairness View'] || calculatedBeliefs['FairnessView'] || ''),
+        integrityStyle: cleanLabel(calculatedBeliefs['Honesty Style'] || calculatedBeliefs['HonestyStyle'] || ''),
+        growthPreference: cleanLabel(calculatedBeliefs['Growth Approach'] || calculatedBeliefs['GrowthApproach'] || ''),
+        impactPreference: cleanLabel(calculatedBeliefs['Impact Motivation'] || calculatedBeliefs['ImpactMotivation'] || '')
       };
     }
     
@@ -1022,10 +1036,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         className="bg-gray-50" 
         style={{ 
           fontFamily: 'Inter, sans-serif',
-          height: isStandalone ? 'auto' : '100vh',
-          overflow: isStandalone ? 'visible' : 'hidden',
-          position: 'relative',
-          minHeight: isStandalone ? '100vh' : '100vh'
+          paddingTop: isStandalone ? '0' : '70px',
+          minHeight: '100vh'
         }}
       >
         {/* COLLAPSIBLE SIDEBAR - Only show if not standalone */}
@@ -1035,17 +1047,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
-            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : '260px'),
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
-            overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
-            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
-            transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
-            backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
-            WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
-            WebkitBackfaceVisibility: isStandalone ? 'visible' : 'hidden' // Safari prevent flickering
+            minHeight: `calc(100vh - 70px)`,
+            overflow: 'visible'
           }}
         >
           {/* Render content based on activeView */}
@@ -1825,10 +1830,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         className="bg-gray-50" 
         style={{ 
           fontFamily: 'Inter, sans-serif',
-          height: isStandalone ? 'auto' : '100vh',
-          overflow: isStandalone ? 'visible' : 'hidden',
-          position: 'relative',
-          minHeight: isStandalone ? '100vh' : '100vh'
+          paddingTop: isStandalone ? '0' : '70px',
+          minHeight: '100vh'
         }}
       >
         {/* COLLAPSIBLE SIDEBAR - Only show if not standalone */}
@@ -1838,17 +1841,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
-            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : '260px'),
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
-            overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
-            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
-            transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
-            backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
-            WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
-            WebkitBackfaceVisibility: isStandalone ? 'visible' : 'hidden' // Safari prevent flickering
+            minHeight: `calc(100vh - 70px)`,
+            overflow: 'visible'
           }}
         >
           {/* Render content based on activeView */}
@@ -2618,10 +2614,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         className="bg-gray-50" 
         style={{ 
           fontFamily: 'Inter, sans-serif',
-          height: isStandalone ? 'auto' : '100vh',
-          overflow: isStandalone ? 'visible' : 'hidden',
-          position: 'relative',
-          minHeight: isStandalone ? '100vh' : '100vh'
+          paddingTop: isStandalone ? '0' : '70px',
+          minHeight: '100vh'
         }}
       >
         {/* COLLAPSIBLE SIDEBAR - Only show if not standalone */}
@@ -2631,17 +2625,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
         <div 
           className="flex flex-col bg-gray-50"
           style={{ 
-            marginLeft: isStandalone ? '0' : (isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px')),
-            marginTop: isStandalone ? '0' : `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
+            marginLeft: isStandalone ? '0' : (isMobile ? '0' : '260px'),
             padding: isStandalone ? '0' : (activeView === 'profile' ? '20px 16px' : '0'),
-            height: isStandalone ? 'auto' : `calc(100vh - 70px - ${mobileMenuHeight}px)`, // Fixed height for dashboard mode, adjusted for menu
-            overflow: isStandalone ? 'visible' : 'auto', // Allow scroll in dashboard mode
-            transition: isStandalone ? 'none' : `margin-left 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94), margin-top 300ms ease, height 300ms ease`,
-            willChange: isStandalone ? 'auto' : 'margin-left, margin-top, height',
-            transform: isStandalone ? 'none' : 'translateZ(0)', // Force GPU acceleration
-            backfaceVisibility: isStandalone ? 'visible' : 'hidden', // Prevent flickering
-            WebkitTransform: isStandalone ? 'none' : 'translateZ(0)', // Safari GPU acceleration
-            WebkitBackfaceVisibility: isStandalone ? 'visible' : 'hidden' // Safari prevent flickering
+            minHeight: `calc(100vh - 70px)`,
+            overflow: 'visible'
           }}
         >
           {/* Render content based on activeView */}
@@ -3359,7 +3346,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
       <div 
         className="flex flex-col bg-gray-50"
         style={{ 
-          marginLeft: isMobile ? '0' : (isSidebarCollapsed ? '72px' : '260px'),
+          marginLeft: isMobile ? '0' : '260px',
           marginTop: `calc(70px + ${mobileMenuHeight}px)`, // Account for topbar height + menu height
           height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
           overflow: 'auto',

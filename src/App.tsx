@@ -822,8 +822,14 @@ export default function App() {
     }
 
     if (view === 'quiz' && isAuthenticated && !quizResults) {
-      setShowOnboarding(true);
-      return;
+      // Check if onboarding was just completed in this session
+      const hasSeenOnboarding = localStorage.getItem('edna-onboarding-completed') === 'true';
+      if (!hasSeenOnboarding) {
+        // Show onboarding for users without quiz results who haven't seen it yet
+        setShowOnboarding(true);
+        return;
+      }
+      // If onboarding was completed, proceed to quiz
     }
 
     setCurrentView(view);
@@ -1005,6 +1011,8 @@ export default function App() {
     return (
       <OnboardingFlow 
         onComplete={() => {
+          // Mark onboarding as completed so it doesn't show again
+          localStorage.setItem('edna-onboarding-completed', 'true');
           setShowOnboarding(false);
           setCurrentView('quiz');
         }}
@@ -1060,7 +1068,7 @@ export default function App() {
         isSticky={currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)}
         dashboardMenuItems={(currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) ? [
           { id: 'profile', label: 'EDNA Profile', icon: User, view: 'profile' },
-          { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: true },
+          { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: false },
           { id: 'chat', label: 'AI Mentor', icon: MessageSquare, view: 'chat' },
           { id: 'courses', label: 'Courses', icon: BookOpen, view: 'courses', disabled: true },
         ] : undefined}

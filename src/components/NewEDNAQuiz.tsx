@@ -17,17 +17,16 @@ interface NewEDNAQuizProps {
 }
 
 export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuizProps) {
-  // Check if user has already seen onboarding (persist in localStorage)
-  const hasSeenOnboarding = localStorage.getItem('edna-onboarding-completed') === 'true';
-  const [showOnboarding, setShowOnboarding] = useState(!hasSeenOnboarding);
+  // Onboarding is now handled by App.tsx, so we always start with Layer 1 introduction
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentLayer, setCurrentLayer] = useState(1);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [currentAnswer, setCurrentAnswer] = useState<string>('');
   const [layer1Result, setLayer1Result] = useState<string | null>(null);
-  // Show Layer 1 introduction if onboarding was already completed (user returning to quiz)
-  const [showLayerIntroduction, setShowLayerIntroduction] = useState(hasSeenOnboarding);
-  const [layerToIntroduce, setLayerToIntroduce] = useState<number | null>(hasSeenOnboarding ? 1 : null);
+  // Always show Layer 1 introduction when quiz starts
+  const [showLayerIntroduction, setShowLayerIntroduction] = useState(true);
+  const [layerToIntroduce, setLayerToIntroduce] = useState<number | null>(1);
   
   // Get current questions based on layer and layer1 result
   const getCurrentQuestions = () => {
@@ -76,10 +75,8 @@ export function NewEDNAQuiz({ onComplete, onBackToHome, userEmail }: NewEDNAQuiz
   const totalQuestions = getTotalQuestions();
   const progress = (totalAnswered / totalQuestions) * 100;
 
-  // Handle onboarding complete
+  // Handle onboarding complete (no longer used - onboarding is in App.tsx)
   const handleOnboardingComplete = () => {
-    // Mark onboarding as completed in localStorage so it doesn't show again
-    localStorage.setItem('edna-onboarding-completed', 'true');
     setShowOnboarding(false);
     // Show Layer 1 introduction after onboarding
     setLayerToIntroduce(1);

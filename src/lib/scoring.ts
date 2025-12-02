@@ -170,42 +170,48 @@ export function calculateLayer2(answers: UserAnswers, layer1Result: Layer1Result
   const weightedQuestionIds = ['L2_Q9', 'L2_Q12', 'L2_Q9a', 'L2_Q12a', 'L2_Q9m', 'L2_Q12m'];
   
   if (path === 'mixed') {
-    // Mixed path: Count Architect-like vs Alchemist-like answers
-    let weightedArchitect = 0;
-    let weightedAlchemist = 0;
-
-    // Architect-like scores
-    const architectLikeScores = ['planner', 'operator', 'analyst', 'architect_ultimate'];
-    // Alchemist-like scores
-    const alchemistLikeScores = ['oracle', 'perfectionist', 'empath', 'alchemist_ultimate'];
+    // NEW LOGIC: Simple count of A vs B answers with special weighting for Q12m
+    let architectScore = 0;
+    let alchemistScore = 0;
 
     questions.forEach((question) => {
       const answerValue = answers[question.id];
       if (!answerValue) return;
 
-      const selectedOption = question.options.find(opt => opt.value === answerValue);
-      if (selectedOption && selectedOption.score) {
-        const score = selectedOption.score;
-        const isWeighted = weightedQuestionIds.includes(question.id);
-        const weight = isWeighted ? 1.5 : 1.0;
-
-        // Categorize based on score value
-        if (architectLikeScores.includes(score)) {
-          weightedArchitect += weight;
-        } else if (alchemistLikeScores.includes(score)) {
-          weightedAlchemist += weight;
+      // Count A answers as Architect-like, B answers as Alchemist-like
+      if (answerValue === 'a') {
+        // Q12m gets +2, all others get +1
+        if (question.id === 'L2_Q12m') {
+          architectScore += 2;
+        } else {
+          architectScore += 1;
+        }
+      } else if (answerValue === 'b') {
+        // Q12m gets +2, all others get +1
+        if (question.id === 'L2_Q12m') {
+          alchemistScore += 2;
+        } else {
+          alchemistScore += 1;
         }
       }
     });
 
-    // Determine result based on weighted scores with +2 threshold
-    if (weightedArchitect >= weightedAlchemist + 2) {
-      return { subtype: 'Architect-like', path: 'mixed', scores: { architect: weightedArchitect, alchemist: weightedAlchemist } };
-    } else if (weightedAlchemist >= weightedArchitect + 2) {
-      return { subtype: 'Alchemist-like', path: 'mixed', scores: { architect: weightedArchitect, alchemist: weightedAlchemist } };
+    console.log('🔍 [Layer 2 Mixed Scoring] Architect score:', architectScore, 'Alchemist score:', alchemistScore);
+
+    // Determine result: whoever has more points wins (tie should never happen due to Q12m weighting)
+    let result;
+    if (architectScore > alchemistScore) {
+      result = { subtype: 'Architect-like', path: 'mixed', scores: { architect: architectScore, alchemist: alchemistScore } };
+    } else if (alchemistScore > architectScore) {
+      result = { subtype: 'Alchemist-like', path: 'mixed', scores: { architect: architectScore, alchemist: alchemistScore } };
     } else {
-      return { subtype: 'Mixed', path: 'mixed', scores: { architect: weightedArchitect, alchemist: weightedAlchemist } };
+      // In case of tie (shouldn't happen due to Q12m +2), default to Architect-like
+      console.warn('⚠️ [Layer 2 Mixed Scoring] Unexpected tie - defaulting to Architect-like');
+      result = { subtype: 'Architect-like', path: 'mixed', scores: { architect: architectScore, alchemist: alchemistScore } };
     }
+    
+    console.log('✅ [Layer 2 Mixed Scoring] Final result:', result.subtype);
+    return result;
   }
 
   // Architect or Alchemist path: Apply weighting

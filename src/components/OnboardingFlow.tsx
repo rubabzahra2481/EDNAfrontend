@@ -530,19 +530,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <div className="overflow-hidden rounded-lg border-2 border-gray-100 shadow-lg">
             {/* Gradient stripe */}
             <div className="h-[6px] bg-gradient-arch-scale-90" aria-hidden="true" />
-
+            
             {/* Header - Hide for step 2 (index 1) and step 5 (index 5) since they have custom headers in content */}
             {currentStep !== 1 && currentStep !== 5 && (
-              <div className="bg-gradient-to-r from-purple-50 to-orange-50 p-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-arch-scale rounded-full flex items-center justify-center shadow-lg">
-                    <StepIcon className="w-8 h-8 text-white" />
-                  </div>
-                  <h2 className="typo-h2-bs">{currentStepData.title}</h2>
+            <div className="bg-gradient-to-r from-purple-50 to-orange-50 p-8">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-arch-scale rounded-full flex items-center justify-center shadow-lg">
+                  <StepIcon className="w-8 h-8 text-white" />
                 </div>
+                <h2 className="typo-h2-bs">{currentStepData.title}</h2>
               </div>
+            </div>
             )}
-
+            
             {/* Content */}
             <div className="p-8 bg-white">
               {currentStepData.content}
@@ -552,8 +552,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           {/* Navigation */}
           <div className="flex items-center justify-between mt-8">
             {currentStep > 0 ? (
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 onClick={() => setCurrentStep(currentStep - 1)}
                 className="h-[var(--bs-cta-height)] border-2 border-[var(--bs-color-indigo)] text-[var(--bs-color-indigo)] hover:bg-[var(--bs-color-indigo)] hover:text-white"
               >
@@ -562,9 +562,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             ) : (
               <div />
             )}
-
+            
             {/* Next/Start Your Assessment Button */}
-            <button 
+              <button 
               onClick={() => {
                 if (currentStep === steps.length - 1) { // Check if it's the last step
                   // Mark onboarding as complete and proceed to quiz
@@ -573,8 +573,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   setCurrentStep(currentStep + 1);
                 }
               }}
-              className="cta-gradient-bs px-8 flex items-center gap-2"
-            >
+                className="cta-gradient-bs px-8 flex items-center gap-2"
+              >
               {currentStep === steps.length - 1 ? (
                 <>
               <Target className="w-5 h-5" />
@@ -582,11 +582,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </>
               ) : (
                 <>
-                  <span>Next</span>
-                  <ArrowRight className="w-4 h-4" />
+                <span>Next</span>
+                <ArrowRight className="w-4 h-4" />
                 </>
               )}
-            </button>
+              </button>
           </div>
         </div>
       </div>
