@@ -25,6 +25,7 @@ import { authHelpers } from './utils/supabase/client';
 import { checkBackendStatus } from './utils/supabase/backend-status';
 import { BACKEND_URL, GHL_CHECKOUT_URL } from './config';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { clearAgentToken } from './utils/agentToken';
 import { User, FileText, MessageSquare, BookOpen } from 'lucide-react';
 
@@ -138,6 +139,17 @@ export default function App() {
   
   if (isResetPasswordRoute) {
     return <ResetPasswordPage />;
+  }
+
+  // Privacy Policy Route - direct access for iOS App Store
+  if (pathname === '/privacy-policy' || pathname === '/privacy-policy/') {
+    return (
+      <div className="min-h-screen bg-white">
+        <PrivacyPolicy onViewChange={(view) => {
+          window.location.href = view === 'home' ? '/' : `/${view}`;
+        }} />
+      </div>
+    );
   }
 
   const [currentView, setCurrentView] = useState('home');
@@ -1214,6 +1226,10 @@ export default function App() {
       
       {currentView === 'insights' && quizResults && (
         <ProfileInsights results={quizResults} />
+      )}
+      
+      {currentView === 'privacy-policy' && (
+        <PrivacyPolicy onViewChange={handleViewChange} />
       )}
     </div>
   );

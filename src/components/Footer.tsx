@@ -140,7 +140,7 @@ export function Footer({ onViewChange }: FooterProps) {
             </p>
             <div className="flex gap-6">
               <button
-                onClick={() => onViewChange('home')}
+                onClick={() => onViewChange('privacy-policy')}
                 className="text-gray-400 hover:text-white transition-colors text-sm"
               >
                 Privacy Policy
