@@ -265,7 +265,7 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
           </p>
           <p className="mt-4">
             <strong>Email:</strong>{' '}
-            <a href="mailto:info@brandscaling.co.uk" className="text-blue-600 hover:underline">
+            <a href="mailto:support@brandscaling.co.uk" className="text-blue-600 hover:underline">
               info@brandscaling.co.uk
             </a>
           </p>

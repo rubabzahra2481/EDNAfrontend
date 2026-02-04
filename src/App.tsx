@@ -26,6 +26,8 @@ import { checkBackendStatus } from './utils/supabase/backend-status';
 import { BACKEND_URL, GHL_CHECKOUT_URL } from './config';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsOfService } from './components/TermsOfService';
+import { ContactSupport } from './components/ContactSupport';
 import { clearAgentToken } from './utils/agentToken';
 import { User, FileText, MessageSquare, BookOpen } from 'lucide-react';
 
@@ -146,6 +148,28 @@ export default function App() {
     return (
       <div className="min-h-screen bg-white">
         <PrivacyPolicy onViewChange={(view) => {
+          window.location.href = view === 'home' ? '/' : `/${view}`;
+        }} />
+      </div>
+    );
+  }
+
+  // Terms of Service Route - direct access for iOS App Store
+  if (pathname === '/termsandservices' || pathname === '/termsandservices/' || pathname === '/terms-of-service' || pathname === '/terms-of-service/') {
+    return (
+      <div className="min-h-screen bg-white">
+        <TermsOfService onViewChange={(view) => {
+          window.location.href = view === 'home' ? '/' : `/${view}`;
+        }} />
+      </div>
+    );
+  }
+
+  // Contact & Support Route - direct access
+  if (pathname === '/contact' || pathname === '/contact/') {
+    return (
+      <div className="min-h-screen bg-white">
+        <ContactSupport onViewChange={(view) => {
           window.location.href = view === 'home' ? '/' : `/${view}`;
         }} />
       </div>
@@ -1230,6 +1254,14 @@ export default function App() {
       
       {currentView === 'privacy-policy' && (
         <PrivacyPolicy onViewChange={handleViewChange} />
+      )}
+      
+      {currentView === 'terms-of-service' && (
+        <TermsOfService onViewChange={handleViewChange} />
+      )}
+      
+      {currentView === 'contact' && (
+        <ContactSupport onViewChange={handleViewChange} />
       )}
     </div>
   );

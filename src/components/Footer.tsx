@@ -97,7 +97,7 @@ export function Footer({ onViewChange }: FooterProps) {
               </li>
               <li>
                 <button
-                  onClick={() => onViewChange('home')}
+                  onClick={() => onViewChange('contact')}
                   className="text-gray-300 hover:text-white transition-colors text-sm"
                 >
                   Contact
@@ -146,7 +146,7 @@ export function Footer({ onViewChange }: FooterProps) {
                 Privacy Policy
               </button>
               <button
-                onClick={() => onViewChange('home')}
+                onClick={() => onViewChange('terms-of-service')}
                 className="text-gray-400 hover:text-white transition-colors text-sm"
               >
                 Terms of Service
