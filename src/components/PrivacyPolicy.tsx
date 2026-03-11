@@ -20,7 +20,7 @@ interface SectionProps {
 
 function PolicySection({ title, children, defaultOpen = false }: SectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="border-b border-gray-200">
       <button
@@ -48,225 +48,236 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="max-w-3xl mx-auto px-6 pt-16 pb-12">
-        <p className="text-sm text-gray-500 mb-4">Updated: 3 February 2026</p>
+        <p className="text-sm text-gray-500 mb-4">Updated: 11 March 2026 | Effective: 11 March 2026</p>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">Privacy policy</h1>
         <p className="text-base text-gray-600">
-          Effective: 3 February 2026
+          Brandscaling — how we collect, use, and protect your information.
         </p>
       </div>
 
       {/* Content */}
       <div className="max-w-3xl mx-auto px-6 pb-16">
-        
+
         <PolicySection title="1. Introduction" defaultOpen={true}>
           <p>
-            Brandscaling is an AI-powered Decision Intelligence and Collaboration Mastery ecosystem
-            designed to help you understand how you think, feel, and make decisions — so you can
-            operate with clarity, consistency, and stability under real business pressure.
+            Welcome to Brandscaling. This Privacy Policy explains how Brand Scaling Ltd. (&quot;Brandscaling,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, and shares information about you when you use our iOS application (the &quot;App&quot;) and the services provided through it. We are committed to protecting your privacy and ensuring that your personal data is handled with transparency and care.
           </p>
           <p>
-            This Privacy Policy explains how we collect, use, store, and protect your personal
-            information when you use the Brandscaling iOS application (the "App").
+            This policy is available within the App at <strong>Settings &gt; Privacy Policy</strong> and online at <strong>brandscaling.co.uk/privacy-policy</strong>.
           </p>
           <p>
-            For the purposes of UK GDPR, <strong>Brand Scaling Ltd.</strong> is the data controller of the information
-            processed through the App.
+            For the purposes of the UK General Data Protection Regulation (UK GDPR), Brand Scaling Ltd. is the data controller.
           </p>
         </PolicySection>
 
         <PolicySection title="2. Information We Collect">
+          <p>We collect information in a few different ways to provide and improve our services.</p>
           <h3 className="text-lg font-semibold mt-4 mb-3">2.1 Information You Provide Directly</h3>
-          <p>We may collect information you provide when you:</p>
           <ul>
-            <li>Create an account</li>
-            <li>Take the E-DNA Assessment</li>
-            <li>Complete interactive workbooks</li>
-            <li>Engage with AI mentors</li>
-            <li>Contact support</li>
+            <li><strong>Account Information:</strong> When you create an account, we collect your name and email address.</li>
+            <li><strong>E-DNA Profile Data:</strong> We collect your responses to the E-DNA (Entrepreneurial DNA) assessment questions. This information is used to generate your unique E-DNA profile.</li>
+            <li><strong>Workbook Data:</strong> We collect the content you create and input into your workbooks, including your goals, reflections, and answers to prompts.</li>
           </ul>
-          <p>This may include:</p>
-          <ul>
-            <li>Name</li>
-            <li>Email address</li>
-            <li>Entrepreneurial Decision Network Assessment (E-DNA) responses</li>
-            <li>Workbook decision entries</li>
-            <li>Identifiers related to your Apple ID for purchase validation</li>
-          </ul>
-
-          <h3 className="text-lg font-semibold mt-6 mb-3">2.2 E-DNA Decision Intelligence Data</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-3">2.2 Information Collected Automatically</h3>
           <p>
-            Brandscaling's core service includes generating your personalised E-DNA decision profile.
-            This profile reflects aspects of how you form, validate, and execute decisions, including
-            indicators related to decision-making style, learning preferences, and stability under
-            entrepreneurial pressure.
+            <strong>Device and Usage Information:</strong> We collect information about your device and how you interact with our App. This includes device type, operating system, app version, crash reports, and analytics on feature usage. This data is anonymised or aggregated and is not linked to your personal account.
           </p>
-          <p>
-            Your E-DNA profile is used solely to personalise your experience inside the App, including
-            learning pathways, interactive tools, and AI mentor guidance.
-          </p>
-          <p className="bg-amber-50 border-l-4 border-amber-400 p-4 my-4">
-            <strong>Important Boundary:</strong> E-DNA is not a medical, psychological, or clinical diagnosis. It is a
-            decision intelligence framework designed for entrepreneurial development and support.
-          </p>
-
-          <h3 className="text-lg font-semibold mt-6 mb-3">2.3 Information Collected Automatically</h3>
-          <p>When you use the App, we may collect:</p>
-          <ul>
-            <li>Device type and operating system</li>
-            <li>App interaction data (e.g., feature usage, session duration)</li>
-            <li>Usage analytics</li>
-            <li>Crash reports and performance diagnostics</li>
-          </ul>
-          <p>This data is used to improve app reliability, security, and user experience.</p>
         </PolicySection>
 
-        <PolicySection title="3. Payments (Apple In-App Purchases)">
+        <PolicySection title="3. Apple Privacy Data Types — Disclosure">
           <p>
-            All paid features, subscriptions, and upgrades in the Brandscaling iOS App are processed
-            securely through Apple's In-App Purchase system. Brandscaling does not collect or store
-            your full payment card details. Apple handles payment processing according to its own
-            privacy and security policies.
+            We are transparent about the data we collect, as outlined in our App Store privacy details. The table below summarises this for your convenience.
           </p>
+          <div className="overflow-x-auto my-4">
+            <table className="min-w-full border border-gray-200 text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Data Type</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">What We Collect</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Purpose of Use</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Linked to Your Identity</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td className="border border-gray-200 px-3 py-2 font-medium">Contact Info</td><td className="border border-gray-200 px-3 py-2">Name, Email Address</td><td className="border border-gray-200 px-3 py-2">App functionality, account management, communications</td><td className="border border-gray-200 px-3 py-2">Yes</td></tr>
+                <tr><td className="border border-gray-200 px-3 py-2 font-medium">User Content</td><td className="border border-gray-200 px-3 py-2">E-DNA assessment responses, workbook entries, AI chat history</td><td className="border border-gray-200 px-3 py-2">App functionality, personalised guidance, AI agent features</td><td className="border border-gray-200 px-3 py-2">Yes</td></tr>
+                <tr><td className="border border-gray-200 px-3 py-2 font-medium">Identifiers</td><td className="border border-gray-200 px-3 py-2">User ID, Device ID</td><td className="border border-gray-200 px-3 py-2">App functionality, analytics</td><td className="border border-gray-200 px-3 py-2">Yes (User ID), No (Device ID)</td></tr>
+                <tr><td className="border border-gray-200 px-3 py-2 font-medium">Diagnostics</td><td className="border border-gray-200 px-3 py-2">Crash data, performance data</td><td className="border border-gray-200 px-3 py-2">App analytics, improving app stability</td><td className="border border-gray-200 px-3 py-2">No</td></tr>
+                <tr><td className="border border-gray-200 px-3 py-2 font-medium">Usage Data</td><td className="border border-gray-200 px-3 py-2">Product interaction data</td><td className="border border-gray-200 px-3 py-2">App analytics, product improvement</td><td className="border border-gray-200 px-3 py-2">No</td></tr>
+              </tbody>
+            </table>
+          </div>
         </PolicySection>
 
         <PolicySection title="4. How We Use Your Information">
-          <p>We use your information to:</p>
+          <p>We use the information we collect for the following purposes:</p>
           <ul>
-            <li>Provide personalised E-DNA results and reports</li>
-            <li>Adapt learning pathways and workbook pacing</li>
-            <li>Enable AI mentor guidance aligned to your decision loop</li>
-            <li>Track progress and completion signals</li>
-            <li>Maintain platform security and performance</li>
-            <li>Improve the App's stability and functionality</li>
+            <li>To create and manage your account.</li>
+            <li>To generate your personalised E-DNA profile and provide you with tailored insights.</li>
+            <li>To power the Decision Intelligence Agent features.</li>
+            <li>To enable you to create, store, and manage your workbooks.</li>
+            <li>To monitor and analyse usage and trends to improve the App&apos;s performance and user experience.</li>
+            <li>To communicate with you about your account or updates to our services.</li>
           </ul>
         </PolicySection>
 
-        <PolicySection title="5. Legal Bases for Processing (UK GDPR)">
-          <p>We process personal data only where a valid legal basis applies, including:</p>
-          <ul>
-            <li><strong>Performance of a Contract:</strong> To provide account access, E-DNA profile generation, personalised learning, and AI mentorship.</li>
-            <li><strong>Legitimate Interests:</strong> To monitor app performance, ensure security, prevent misuse, and improve services without overriding user rights.</li>
-            <li><strong>Consent:</strong> Where required, including for direct marketing communications.</li>
-            <li><strong>Legal Obligation:</strong> Where processing is necessary to comply with applicable laws.</li>
-          </ul>
+        <PolicySection title="5. Third-Party AI Processing">
           <p>
-            For clarity: account data and E-DNA processing rely primarily on performance of a contract;
-            analytics and diagnostics rely on legitimate interests; marketing communications rely on
-            consent.
+            To provide our Decision Intelligence Agent features, we use services from trusted third-party AI providers (OpenAI, Anthropic, Google, DeepSeek). This section explicitly details the data shared with these services.
           </p>
-        </PolicySection>
-
-        <PolicySection title="6. AI Mentors and Automated Processing">
+          <h3 className="text-lg font-semibold mt-4 mb-3">5.1 What Data Is Sent to Third Parties?</h3>
           <p>
-            Brandscaling includes two AI mentors: AI-Architect and AI-Alchemist. These mentors may
-            process your E-DNA profile and learning context to provide personalised guidance. AI
-            mentors:
+            When you interact with the Decision Intelligence Agent, we send a limited, session-scoped set of your data to our AI partners to generate a relevant response. <strong>We never share your name, email, or other direct personal identifiers with these partners.</strong> The specific data transmitted is as follows:
           </p>
           <ul>
-            <li>Do not make decisions for you</li>
-            <li>Do not provide medical, legal, or financial advice</li>
-            <li>Do not replace human judgement</li>
+            <li><strong>Your E-DNA Profile Summary:</strong> A high-level summary of your E-DNA type (e.g., &quot;Architect, Alchemist&quot;).</li>
+            <li><strong>Your Current Query:</strong> The specific question or prompt you just entered into the chat.</li>
+            <li><strong>Recent Conversation History:</strong> The immediate preceding turns of your conversation with the AI agent to provide context.</li>
           </ul>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.2 Who Receives This Data?</h3>
           <p>
-            Brandscaling does not engage in solely automated decision-making that produces legal or
-            similarly significant effects as defined under Article 22 of the UK GDPR.
+            Your data may be sent to one or more of the following trusted service providers, depending on the AI model you select within the App, for the sole purpose of delivering the AI Agent service:
           </p>
-        </PolicySection>
-
-        <PolicySection title="7. Data Storage and Deletion">
-          <p>
-            Your E-DNA profile is persistent and versioned over time. Workbook outputs are stored as
-            structured decision artifacts to support continuity and reflection.
-          </p>
-          <p>
-            We retain your personal data for as long as your account remains active. If you delete your
-            account, your personal data will be permanently deleted within 30 days, except where
-            retention is required for legal or accounting purposes. Anonymised data may be retained
-            indefinitely for analytical and improvement purposes.
-          </p>
-        </PolicySection>
-
-        <PolicySection title="8. Sharing of Data">
-          <p><strong>We do not sell your personal data.</strong></p>
-          <p>We may share limited data with trusted service providers only for:</p>
           <ul>
-            <li>Hosting and infrastructure (e.g., AWS)</li>
-            <li>Analytics and app performance monitoring (e.g., Firebase)</li>
-            <li>AI service delivery (e.g., OpenAI)</li>
+            <li><strong>OpenAI, L.L.C.</strong> (San Francisco, USA)</li>
+            <li><strong>Anthropic, PBC</strong> (San Francisco, USA)</li>
+            <li><strong>Google, LLC (for Gemini)</strong> (Mountain View, USA)</li>
+            <li><strong>DeepSeek, Ltd.</strong> (Hangzhou, China)</li>
           </ul>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.3 Your Permission — Explicit Consent Before Data Is Shared</h3>
           <p>
-            All service providers are required to maintain appropriate confidentiality and security
-            safeguards. Some providers may be located outside the UK. Where international transfers
-            occur, we ensure appropriate safeguards such as Standard Contractual Clauses are in place.
+            In compliance with Apple&apos;s guidelines, <strong>we will not transmit any of your data to a third-party AI service without your explicit permission.</strong> This applies to both registered and guest users.
+          </p>
+          <p>Before you can use the AI agent&apos;s features for the first time, the App will present a clear, one-time consent screen. This screen will:</p>
+          <ol className="list-decimal list-inside space-y-2">
+            <li>State that the feature uses third-party AI services to function.</li>
+            <li>Clearly list the specific data that will be shared (as detailed in Section 5.1).</li>
+            <li>Name the third parties who may receive the data (OpenAI, Anthropic, Google, DeepSeek).</li>
+            <li>Require you to actively tap a button to provide your consent before proceeding.</li>
+          </ol>
+          <p>If you do not consent, the rest of the App remains fully functional, but the AI agent&apos;s features will be disabled.</p>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.4 Withdrawing Consent</h3>
+          <p>
+            If you have previously granted consent and wish to withdraw it, you can do so at any time. Navigate to <strong>Settings &gt; Privacy &gt; AI Agent Data</strong> and select <strong>&quot;Withdraw Consent.&quot;</strong> This will immediately disable all AI agent data transmission and deactivate the AI agent features until consent is re-granted.
+          </p>
+          <h3 className="text-lg font-semibold mt-6 mb-3">5.5 Equal Protection Commitment</h3>
+          <p>
+            All our third-party AI service providers are contractually bound by Data Processing Agreements (DPAs). These agreements ensure they provide the same or equal protection of your data as stated in this Privacy Policy. They may not use data transmitted from the Brandscaling App for their own advertising, marketing, or to train their models. All international data transfers are governed by Standard Contractual Clauses approved under UK GDPR.
           </p>
         </PolicySection>
 
-        <PolicySection title="9. Your Rights (UK GDPR)">
-          <p>You have the right to:</p>
+        <PolicySection title="6. Other Data Sharing">
+          <p><strong>We do not sell your personal data.</strong> We may share limited data with other trusted service providers strictly for the purposes stated:</p>
+          <div className="overflow-x-auto my-4">
+            <table className="min-w-full border border-gray-200 text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Provider</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Location</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Purpose</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Data Shared</th>
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">Equal Protection Guaranteed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-200 px-3 py-2 font-medium">AWS (Amazon Web Services)</td>
+                  <td className="border border-gray-200 px-3 py-2">United States</td>
+                  <td className="border border-gray-200 px-3 py-2">Hosting and infrastructure</td>
+                  <td className="border border-gray-200 px-3 py-2">Account data, E-DNA profile, workbook data (encrypted)</td>
+                  <td className="border border-gray-200 px-3 py-2">Yes — via Standard Contractual Clauses</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-200 px-3 py-2 font-medium">Firebase (Google)</td>
+                  <td className="border border-gray-200 px-3 py-2">United States</td>
+                  <td className="border border-gray-200 px-3 py-2">Analytics and app performance monitoring</td>
+                  <td className="border border-gray-200 px-3 py-2">Anonymised usage and diagnostic data</td>
+                  <td className="border border-gray-200 px-3 py-2">Yes — via Standard Contractual Clauses</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </PolicySection>
+
+        <PolicySection title="7. Guest Users and Data Collection">
+          <p>
+            If you use features of the App that are available without creating an account (such as the guest-accessible AI chat), we will not collect any personal data from you. As noted in Section 5.3, we will still ask for your explicit consent before transmitting any chat data to our third-party AI partners. Any interaction with the AI Agent in a guest mode will be processed anonymously and will not be linked to any device or user identifier.
+          </p>
+        </PolicySection>
+
+        <PolicySection title="8. Future Features (Phase 2)">
+          <p>
+            Brandscaling is an evolving ecosystem. Future versions of the App may include additional features that require new data processing, such as:
+          </p>
           <ul>
-            <li>Access your personal data</li>
-            <li>Correct inaccurate data</li>
-            <li>Request deletion of your data</li>
-            <li>Restrict or object to certain processing</li>
-            <li>Request a copy of your data in a portable, machine-readable format (data portability)</li>
-            <li>Withdraw consent for marketing at any time</li>
-            <li>Lodge a complaint with the Information Commissioner's Office (ICO) at{' '}
-              <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                ico.org.uk
-              </a>{' '}
-              if you believe your data protection rights have been violated.
-            </li>
+            <li><strong>Social Logins (Apple, Google):</strong> To provide alternative ways to create an account.</li>
+            <li><strong>Team Collaboration Features:</strong> To allow you to share insights or workbooks with team members within the App.</li>
+            <li><strong>Advanced AI Capabilities:</strong> Including features that may process additional data types (such as workbook content) to provide deeper, more personalised insights. For example, we may use a vector database (e.g., from Pinecone Systems, Inc.) to allow the AI to find relevant information from your past work without sending the raw text for every query.</li>
           </ul>
-          <p>To exercise these rights, contact us using the details below.</p>
+          <p>
+            Before any such features are enabled, this Privacy Policy will be updated, and we will obtain your explicit consent for any new data sharing where required.
+          </p>
         </PolicySection>
 
-        <PolicySection title="10. Security">
-          <p>We implement appropriate technical and organisational safeguards including:</p>
+        <PolicySection title="9. Legal Bases for Processing (UK GDPR)">
+          <p>We process personal data only where a valid legal basis applies:</p>
           <ul>
-            <li>Encryption in transit and at rest</li>
-            <li>Access controls and principle of least privilege</li>
-            <li>Regular monitoring for unauthorised access</li>
+            <li><strong>Performance of a Contract:</strong> To provide account access, E-DNA profile generation, and workbook functionality.</li>
+            <li><strong>Legitimate Interests:</strong> To monitor app performance, ensure security, and improve services.</li>
+            <li><strong>Consent:</strong> For all AI agent data processing involving transmission to third parties.</li>
           </ul>
+        </PolicySection>
+
+        <PolicySection title="10. Data Storage, Retention, and Deletion">
           <p>
-            In the event of a personal data breach, we will notify affected users and the ICO where
-            required by law.
+            We retain your personal data for as long as your account remains active. If you delete your account, your personal data will be permanently deleted within 30 days, except where retention is required for legal or accounting purposes.
+          </p>
+          <p>
+            <strong>In-App Account Deletion:</strong> You can permanently delete your Brandscaling account and all associated personal data directly from within the App at any time. To do so, navigate to <strong>Settings &gt; Account &gt; Delete Account</strong>. You will be asked to confirm your decision before deletion is initiated. This action is irreversible.
           </p>
         </PolicySection>
 
-        <PolicySection title="11. Tracking Technologies & Cookies">
+        <PolicySection title="11. Your Rights (UK GDPR)">
           <p>
-            The Brandscaling App does not use cookies or other similar technologies for tracking users
-            across third-party apps or websites for advertising purposes. Our use of analytics tools is
-            confined to improving the app experience itself. We do not use any trackers that would
-            require consent under Apple's App Tracking Transparency (ATT) framework.
+            You have the right to access, correct, or request deletion of your personal data. You may also restrict or object to certain processing and request a copy of your data. To exercise these rights, please contact us.
+          </p>
+          <p>
+            You also have the right to lodge a complaint with the Information Commissioner&apos;s Office (ICO) at{' '}
+            <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+              ico.org.uk
+            </a>{' '}
+            if you believe your data protection rights have been violated.
           </p>
         </PolicySection>
 
-        <PolicySection title="12. Children's Privacy">
+        <PolicySection title="12. Security">
           <p>
-            The Brandscaling App is not intended for individuals under the age of 18. We do not
-            knowingly collect personal data from children.
+            We implement appropriate technical and organisational safeguards, including encryption in transit (TLS) and at rest (AES-256), access controls, and regular monitoring for unauthorised access.
           </p>
         </PolicySection>
 
-        <PolicySection title="13. Updates to This Policy">
+        <PolicySection title="13. Tracking Technologies and Apple App Tracking Transparency">
           <p>
-            We may update this Privacy Policy as the ecosystem evolves. Material changes will be
-            communicated in-app or via email.
+            The Brandscaling App does not use cookies or similar technologies to track users across third-party apps or websites for advertising purposes. As a result, the App does not present an App Tracking Transparency (ATT) permission prompt.
           </p>
         </PolicySection>
 
-        <PolicySection title="14. Contact Us">
-          <p>For privacy questions or data protection requests, contact:</p>
+        <PolicySection title="14. Children's Privacy">
+          <p>
+            The Brandscaling App is intended exclusively for individuals aged 18 and over. We do not knowingly collect personal data from children.
+          </p>
+        </PolicySection>
+
+        <PolicySection title="15. Contact Us">
+          <p>For privacy questions, data protection requests, or to exercise your rights, please contact:</p>
           <p className="mt-4">
             <strong>Brand Scaling Ltd.</strong><br />
-            35 Wycome Road<br />
-            Birmingham, UK
+            35 Wycome Road, Birmingham, UK
           </p>
           <p className="mt-4">
             <strong>Email:</strong>{' '}
             <a href="mailto:support@brandscaling.co.uk" className="text-blue-600 hover:underline">
-              info@brandscaling.co.uk
+              support@brandscaling.co.uk
             </a>
           </p>
           <p>
@@ -274,6 +285,12 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
             <a href="https://brandscaling.co.uk/contact" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
               brandscaling.co.uk/contact
             </a>
+          </p>
+        </PolicySection>
+
+        <PolicySection title="16. Updates to This Policy">
+          <p>
+            We may update this Privacy Policy as the App evolves or as legal requirements change. Material changes will be communicated in-app or via email before they take effect. The &quot;Updated&quot; date at the top of this document reflects the date of the most recent revision.
           </p>
         </PolicySection>
 
