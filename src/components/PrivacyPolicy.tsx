@@ -287,8 +287,22 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
             </a>
           </p>
         </PolicySection>
+        <PolicySection title="16. In-App Purchases">
+          <p>
+            The Brandscaling App may offer optional in-app purchases that allow you to buy digital services, features, or content available within the App. These purchases may be presented to you based on your personalised tags, tiers, or other profile characteristics within the Brandscaling ecosystem.
+            </p>
+            <p>
+              All in-app purchases are processed securely through Apple’s App Store payment system using Apple In-App Purchase. When you make a purchase, the payment transaction is handled directly by Apple through your Apple ID account. Brand Scaling Ltd. does not collect or store your payment card details.
+              </p>
+              <p>
+                Apple processes the payment on our behalf and notifies the App of successful transactions so that the purchased digital services can be delivered to your account. 
+                </p>
+                <p>
+                  The digital services and content available through in-app purchases are the intellectual property of Brand Scaling Ltd. and are licensed, not sold, to you for use within the App in accordance with our terms of service.
+                  </p>
+                  </PolicySection>
 
-        <PolicySection title="16. Updates to This Policy">
+        <PolicySection title="17. Updates to This Policy">
           <p>
             We may update this Privacy Policy as the App evolves or as legal requirements change. Material changes will be communicated in-app or via email before they take effect. The &quot;Updated&quot; date at the top of this document reflects the date of the most recent revision.
           </p>
