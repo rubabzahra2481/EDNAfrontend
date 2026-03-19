@@ -268,7 +268,39 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
           </p>
         </PolicySection>
 
-        <PolicySection title="15. Contact Us">
+        <PolicySection title="15. In-App Purchases">
+          <p>
+            The Brandscaling App may offer optional in-app purchases that allow you to buy digital services, features, or content available within the App. These purchases may be presented to you based on your personalised tags, tiers, or other profile characteristics within the Brandscaling ecosystem.
+            </p>
+            <p>
+              All in-app purchases are processed securely through Apple’s App Store payment system using Apple In-App Purchase. When you make a purchase, the payment transaction is handled directly by Apple through your Apple ID account. Brand Scaling Ltd. does not collect or store your payment card details.
+              </p>
+              <p>
+                Apple processes the payment on our behalf and notifies the App of successful transactions so that the purchased digital services can be delivered to your account. 
+                </p>
+                <p>
+                  The digital services and content available through in-app purchases are the intellectual property of Brand Scaling Ltd. and are licensed, not sold, to you for use within the App in accordance with our terms of service.
+                  </p>
+          </PolicySection>
+        <PolicySection title="16. No Refund Policy">
+            <p>
+            All in-app purchases are final and non-refundable except as required by applicable law. If you believe you are entitled to a refund, you may request one directly through Apple at{' '}
+              <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                reportaproblem.apple.com
+              </a>
+            </p>
+          </PolicySection>
+        <PolicySection title="17. Purchase Restoration">
+          <p>
+          If you have previously purchased the Full E-DNA Report, you can restore your purchase at no additional cost by tapping 'Restore Purchases' in the app settings. Restoration requires you to be signed in with the same <strong>Apple ID</strong> used for the original purchase.
+          </p>
+        </PolicySection>
+        <PolicySection title="18. Updates to This Policy">
+          <p>
+            We may update this Privacy Policy as the App evolves or as legal requirements change. Material changes will be communicated in-app or via email before they take effect. The &quot;Updated&quot; date at the top of this document reflects the date of the most recent revision.
+          </p>
+        </PolicySection>
+        <PolicySection title="19. Contact Us">
           <p>For privacy questions, data protection requests, or to exercise your rights, please contact:</p>
           <p className="mt-4">
             <strong>Brand Scaling Ltd.</strong><br />
@@ -285,38 +317,6 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
             <a href="https://brandscaling.co.uk/contact" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
               brandscaling.co.uk/contact
             </a>
-          </p>
-        </PolicySection>
-        <PolicySection title="16. In-App Purchases">
-          <p>
-            The Brandscaling App may offer optional in-app purchases that allow you to buy digital services, features, or content available within the App. These purchases may be presented to you based on your personalised tags, tiers, or other profile characteristics within the Brandscaling ecosystem.
-            </p>
-            <p>
-              All in-app purchases are processed securely through Apple’s App Store payment system using Apple In-App Purchase. When you make a purchase, the payment transaction is handled directly by Apple through your Apple ID account. Brand Scaling Ltd. does not collect or store your payment card details.
-              </p>
-              <p>
-                Apple processes the payment on our behalf and notifies the App of successful transactions so that the purchased digital services can be delivered to your account. 
-                </p>
-                <p>
-                  The digital services and content available through in-app purchases are the intellectual property of Brand Scaling Ltd. and are licensed, not sold, to you for use within the App in accordance with our terms of service.
-                  </p>
-          </PolicySection>
-          <PolicySection title="17. No Refund Policy">
-            <p>
-            All in-app purchases are final and non-refundable except as required by applicable law. If you believe you are entitled to a refund, you may request one directly through Apple at{' '}
-              <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                reportaproblem.apple.com
-              </a>
-            </p>
-          </PolicySection>
-          <PolicySection title="18. Purchase Restoration">
-          <p>
-          If you have previously purchased the Full E-DNA Report, you can restore your purchase at no additional cost by tapping 'Restore Purchases' in the app settings. Restoration requires you to be signed in with the same <strong>Apple ID</strong> used for the original purchase.
-          </p>
-        </PolicySection>
-        <PolicySection title="19. Updates to This Policy">
-          <p>
-            We may update this Privacy Policy as the App evolves or as legal requirements change. Material changes will be communicated in-app or via email before they take effect. The &quot;Updated&quot; date at the top of this document reflects the date of the most recent revision.
           </p>
         </PolicySection>
 
