@@ -300,9 +300,21 @@ export function PrivacyPolicy({ onViewChange }: PrivacyPolicyProps) {
                 <p>
                   The digital services and content available through in-app purchases are the intellectual property of Brand Scaling Ltd. and are licensed, not sold, to you for use within the App in accordance with our terms of service.
                   </p>
-                  </PolicySection>
-
-        <PolicySection title="17. Updates to This Policy">
+          </PolicySection>
+          <PolicySection title="17. No Refund Policy">
+            <p>
+            All in-app purchases are final and non-refundable except as required by applicable law. If you believe you are entitled to a refund, you may request one directly through Apple at{' '}
+              <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                reportaproblem.apple.com
+              </a>
+            </p>
+          </PolicySection>
+          <PolicySection title="18. Purchase Restoration">
+          <p>
+          If you have previously purchased the Full E-DNA Report, you can restore your purchase at no additional cost by tapping 'Restore Purchases' in the app settings. Restoration requires you to be signed in with the same <strong>Apple ID</strong> used for the original purchase.
+          </p>
+        </PolicySection>
+        <PolicySection title="19. Updates to This Policy">
           <p>
             We may update this Privacy Policy as the App evolves or as legal requirements change. Material changes will be communicated in-app or via email before they take effect. The &quot;Updated&quot; date at the top of this document reflects the date of the most recent revision.
           </p>
