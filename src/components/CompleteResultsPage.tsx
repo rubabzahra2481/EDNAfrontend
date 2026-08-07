@@ -327,10 +327,13 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
 
 
         {/* MAIN CONTENT AREA */}
-        <div 
+        <div
           className="flex flex-col bg-gray-50 md:ml-[260px]"
-          style={{ 
+          style={{
             marginTop: '0px', // No margin needed since parent is positioned
+            // md:ml-[260px] is NOT in the prebuilt CSS snapshot (no Tailwind build
+            // in this project) — inline margin like the with-results paths use.
+            marginLeft: isMobile ? '0' : '260px',
             padding: activeView === 'profile' ? '20px 16px' : '0',
             height: `calc(100vh - 70px - ${mobileMenuHeight}px)`,
             overflow: 'hidden', // Child components handle their own scrolling

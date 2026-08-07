@@ -16,6 +16,10 @@ import { toVimeoEmbed } from '../utils/vimeo';
  * Zoom Recordings — website port of the iOS app feature.
  * Categories (Deal Clinic / Mastermind Days) → monthly folders → recordings → player.
  * Read-only; content is fed by the backend's Vimeo auto-sync.
+ *
+ * NOTE: this project ships a prebuilt CSS snapshot (no Tailwind build), so any
+ * utility class not in src/index.css silently does nothing. Layout-critical
+ * styling here is inline, matching the rest of the codebase.
  */
 
 interface ZoomCategory {
@@ -63,6 +67,26 @@ type Level =
 const CATEGORY_STYLES: Record<string, { gradient: string; icon: string }> = {
   deal_clinic: { gradient: 'linear-gradient(135deg, #42047d 0%, #8B5CF6 100%)', icon: '#8B5CF6' },
   mastermind: { gradient: 'linear-gradient(135deg, #f6782f 0%, #F97316 100%)', icon: '#F97316' },
+};
+
+const ellipsis: React.CSSProperties = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const rowCard: React.CSSProperties = {
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '16px',
+  background: '#ffffff',
+  border: '1px solid #e5e7eb',
+  borderRadius: '12px',
+  padding: '16px 20px',
+  textAlign: 'left',
+  cursor: 'pointer',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
 };
 
 function formatDate(iso: string | null): string | null {
@@ -160,21 +184,38 @@ export function ZoomRecordings() {
   };
 
   const header = (
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-3 min-w-0">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '24px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
         {level.name !== 'categories' && (
           <button
             onClick={goBack}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
             aria-label="Back"
+            style={{
+              padding: '8px',
+              borderRadius: '8px',
+              background: '#f3f4f6',
+              border: 'none',
+              cursor: 'pointer',
+              flexShrink: 0,
+              display: 'flex',
+            }}
           >
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
+            <ArrowLeft style={{ width: '20px', height: '20px', color: '#374151' }} />
           </button>
         )}
-        <div className="min-w-0">
+        <div style={{ minWidth: 0 }}>
           <h1
-            className="text-2xl font-bold truncate"
             style={{
+              ...ellipsis,
+              fontSize: '24px',
+              fontWeight: 700,
               backgroundImage: 'linear-gradient(to right, #42047d, #f6782f)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -186,7 +227,7 @@ export function ZoomRecordings() {
             {level.name === 'folder' && level.folder.title}
             {level.name === 'recording' && level.recording.title}
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5 truncate">
+          <p style={{ ...ellipsis, fontSize: '14px', color: '#6b7280', marginTop: '2px' }}>
             {level.name === 'categories' && 'Recorded Deal Clinics and Mastermind Days'}
             {level.name === 'folders' && 'Browse by month'}
             {level.name === 'folder' && level.category.label}
@@ -198,29 +239,57 @@ export function ZoomRecordings() {
     </div>
   );
 
+  const emptyState = (icon: React.ReactNode, text: string) => (
+    <div style={{ padding: '96px 16px', textAlign: 'center', color: '#6b7280' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>{icon}</div>
+      <p>{text}</p>
+    </div>
+  );
+
   const renderBody = () => {
     if (loading) {
       return (
-        <div className="flex flex-col items-center justify-center py-24 text-gray-500">
-          <RefreshCw className="w-8 h-8 animate-spin mb-3" style={{ color: '#8B5CF6' }} />
-          <p className="text-sm">Loading…</p>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '96px 0',
+            color: '#6b7280',
+          }}
+        >
+          <RefreshCw
+            className="animate-spin"
+            style={{ width: '32px', height: '32px', marginBottom: '12px', color: '#8B5CF6' }}
+          />
+          <p style={{ fontSize: '14px' }}>Loading…</p>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-          <p className="text-gray-700 font-medium mb-2">Couldn't load recordings</p>
-          <p className="text-sm text-gray-500 mb-6">{error}</p>
+        <div style={{ padding: '96px 16px', textAlign: 'center' }}>
+          <p style={{ color: '#374151', fontWeight: 500, marginBottom: '8px' }}>
+            Couldn't load recordings
+          </p>
+          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>{error}</p>
           <button
             onClick={() => {
               if (level.name === 'categories') loadCategories();
               else if (level.name === 'folders') openCategory(level.category);
               else if (level.name === 'folder') openFolder(level.category, level.folder);
             }}
-            className="px-5 py-2.5 rounded-lg text-white font-medium"
-            style={{ background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)' }}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '8px',
+              color: '#ffffff',
+              fontWeight: 500,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(to right, #8B5CF6 0%, #F97316 100%)',
+            }}
           >
             Try again
           </button>
@@ -230,19 +299,34 @@ export function ZoomRecordings() {
 
     if (level.name === 'categories') {
       return (
-        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px',
+            maxWidth: '768px',
+          }}
+        >
           {categories.map((cat) => {
             const style = CATEGORY_STYLES[cat.category] || CATEGORY_STYLES.deal_clinic;
             return (
               <button
                 key={cat.category}
                 onClick={() => openCategory(cat)}
-                className="text-left rounded-2xl p-6 text-white shadow-md hover:shadow-xl transition-shadow"
-                style={{ background: style.gradient }}
+                style={{
+                  textAlign: 'left',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  background: style.gradient,
+                }}
               >
-                <Video className="w-8 h-8 mb-4 opacity-90" />
-                <h3 className="text-xl font-semibold mb-1">{cat.label}</h3>
-                <p className="text-sm opacity-80">
+                <Video style={{ width: '32px', height: '32px', marginBottom: '16px', opacity: 0.9 }} />
+                <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '4px' }}>{cat.label}</h3>
+                <p style={{ fontSize: '14px', opacity: 0.8 }}>
                   {cat.folderCount} {cat.folderCount === 1 ? 'folder' : 'folders'} ·{' '}
                   {cat.recordingCount} {cat.recordingCount === 1 ? 'recording' : 'recordings'}
                 </p>
@@ -255,31 +339,25 @@ export function ZoomRecordings() {
 
     if (level.name === 'folders') {
       if (folders.length === 0) {
-        return (
-          <div className="py-24 text-center text-gray-500">
-            <Folder className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No recordings published yet — check back soon.</p>
-          </div>
+        return emptyState(
+          <Folder style={{ width: '48px', height: '48px', color: '#d1d5db' }} />,
+          'No recordings published yet — check back soon.'
         );
       }
       const iconColor = (CATEGORY_STYLES[level.category.category] || CATEGORY_STYLES.deal_clinic).icon;
       return (
-        <div className="space-y-3 max-w-3xl">
+        <div style={{ maxWidth: '768px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {folders.map((folder) => (
-            <button
-              key={folder.id}
-              onClick={() => openFolder(level.category, folder)}
-              className="w-full flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-5 py-4 hover:border-gray-300 hover:shadow-sm transition-all text-left"
-            >
-              <Folder className="w-6 h-6 flex-shrink-0" style={{ color: iconColor }} />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 truncate">{folder.title}</p>
-                <p className="text-sm text-gray-500">
+            <button key={folder.id} onClick={() => openFolder(level.category, folder)} style={rowCard}>
+              <Folder style={{ width: '24px', height: '24px', flexShrink: 0, color: iconColor }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ ...ellipsis, fontWeight: 600, color: '#111827' }}>{folder.title}</p>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
                   {folder.videoCount} {folder.videoCount === 1 ? 'video' : 'videos'}
                   {folder.description ? ` · ${folder.description}` : ''}
                 </p>
               </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <ChevronRight style={{ width: '20px', height: '20px', color: '#9ca3af', flexShrink: 0 }} />
             </button>
           ))}
         </div>
@@ -288,42 +366,58 @@ export function ZoomRecordings() {
 
     if (level.name === 'folder') {
       if (recordings.length === 0) {
-        return (
-          <div className="py-24 text-center text-gray-500">
-            <PlayCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No recordings in this folder yet.</p>
-          </div>
+        return emptyState(
+          <PlayCircle style={{ width: '48px', height: '48px', color: '#d1d5db' }} />,
+          'No recordings in this folder yet.'
         );
       }
       return (
-        <div className="space-y-3 max-w-3xl">
+        <div style={{ maxWidth: '768px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {recordings.map((rec) => {
             const date = formatDate(rec.recordedOn);
+            const videoCount = rec.items.filter((i) => i.itemType === 'video').length;
             return (
               <button
                 key={rec.id}
                 onClick={() => openRecording(level.category, level.folder, rec)}
-                className="w-full flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-5 py-4 hover:border-gray-300 hover:shadow-sm transition-all text-left"
+                style={rowCard}
               >
                 <div
-                  className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #42047d 0%, #f6782f 100%)' }}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    background: 'linear-gradient(135deg, #42047d 0%, #f6782f 100%)',
+                  }}
                 >
-                  <PlayCircle className="w-6 h-6 text-white" />
+                  <PlayCircle style={{ width: '24px', height: '24px', color: '#ffffff' }} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">{rec.title}</p>
-                  <p className="text-sm text-gray-500 flex items-center gap-1.5">
-                    {date && (
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ ...ellipsis, fontWeight: 600, color: '#111827' }}>{rec.title}</p>
+                  <p
+                    style={{
+                      fontSize: '14px',
+                      color: '#6b7280',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    {date ? (
                       <>
-                        <Calendar className="w-3.5 h-3.5" />
+                        <Calendar style={{ width: '14px', height: '14px' }} />
                         {date}
                       </>
+                    ) : (
+                      `${videoCount} ${videoCount === 1 ? 'video' : 'videos'}`
                     )}
-                    {!date && `${rec.items.filter((i) => i.itemType === 'video').length} video`}
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight style={{ width: '20px', height: '20px', color: '#9ca3af', flexShrink: 0 }} />
               </button>
             );
           })}
@@ -334,41 +428,53 @@ export function ZoomRecordings() {
     // recording player
     const videos = level.recording.items.filter((i) => i.itemType === 'video' && i.vimeoUrl);
     return (
-      <div className="max-w-4xl space-y-6">
-        {videos.length === 0 && (
-          <div className="py-24 text-center text-gray-500">
-            <Video className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>This recording has no playable video.</p>
-          </div>
-        )}
+      <div style={{ maxWidth: '896px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {videos.length === 0 &&
+          emptyState(
+            <Video style={{ width: '48px', height: '48px', color: '#d1d5db' }} />,
+            "This recording has no playable video."
+          )}
         {videos.map((item) => {
           const embed = toVimeoEmbed(item.vimeoUrl);
           return (
-            <div key={item.id} className="space-y-2">
-              {item.title && <p className="font-medium text-gray-800">{item.title}</p>}
+            <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {item.title && <p style={{ fontWeight: 500, color: '#1f2937' }}>{item.title}</p>}
               {embed ? (
                 <div
-                  className="relative w-full rounded-xl overflow-hidden bg-black shadow-md"
-                  style={{ paddingBottom: '56.25%' }}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    paddingBottom: '56.25%',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    background: '#000000',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  }}
                 >
                   <iframe
                     src={embed.src}
-                    className="absolute inset-0 w-full h-full"
-                    style={{ border: 0 }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 0,
+                    }}
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
                     title={item.title || level.recording.title}
                   />
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
                   This video can't be embedded.{' '}
                   {item.vimeoUrl && (
                     <a
                       href={item.vimeoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      style={{ color: '#2563eb', textDecoration: 'underline' }}
                     >
                       Open on Vimeo
                     </a>
@@ -379,15 +485,17 @@ export function ZoomRecordings() {
           );
         })}
         {level.recording.description && (
-          <p className="text-gray-600 text-sm leading-relaxed">{level.recording.description}</p>
+          <p style={{ color: '#4b5563', fontSize: '14px', lineHeight: 1.6 }}>
+            {level.recording.description}
+          </p>
         )}
       </div>
     );
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div style={{ width: '100%', height: '100%', overflowY: 'auto', background: '#f9fafb' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
         {header}
         {renderBody()}
       </div>
