@@ -30,7 +30,7 @@ import { TermsOfService } from './components/TermsOfService';
 import { ContactSupport } from './components/ContactSupport';
 import { DeleteAccountPage } from './components/DeleteAccountPage';
 import { clearAgentToken } from './utils/agentToken';
-import { User, FileText, MessageSquare, BookOpen } from 'lucide-react';
+import { User, FileText, MessageSquare, BookOpen, Video } from 'lucide-react';
 
 interface User {
   email: string;
@@ -1116,6 +1116,7 @@ export default function App() {
           { id: 'profile', label: 'EDNA Profile', icon: User, view: 'profile' },
           { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: false },
           { id: 'chat', label: 'AI Mentor', icon: MessageSquare, view: 'chat' },
+          { id: 'zoom-recordings', label: 'Zoom Recordings', icon: Video, view: 'zoom-recordings' },
           { id: 'courses', label: 'Courses', icon: BookOpen, view: 'courses', disabled: true },
         ] : undefined}
         activeDashboardView={(currentView === 'dashboard' || (currentView === 'home' && isAuthenticated)) ? activeDashboardView : undefined}
