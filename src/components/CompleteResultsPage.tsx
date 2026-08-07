@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { EDNAResults } from '../lib/scoring';
-import { Home, ChevronLeft, ChevronRight, BookOpen, Brain, MessageSquare, FileText, User } from 'lucide-react';
+import { Home, ChevronLeft, ChevronRight, BookOpen, Brain, MessageSquare, FileText, User, Video } from 'lucide-react';
 import brandscalingLogo from 'figma:asset/4ffc1593ac524b5a444c05cca1a8149a7e87be86.png';
 import { Courses } from './Courses';
 import { AIMentorHub } from './AIMentorHub';
 import { Workbooks } from './Workbooks';
+import { ZoomRecordings } from './ZoomRecordings';
 import { BACKEND_URL } from '../config';
 import { useIsMobile } from './ui/use-mobile';
 
@@ -25,10 +26,10 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
   const [activeView, setActiveView] = useState<string>(externalActiveView || 'profile'); // Always default to EDNA Profile section
   const isMobile = useIsMobile();
   
-  // Calculate mobile menu height (approximately 280px for dashboard menu with 4 items + auth button)
+  // Calculate mobile menu height (approximately 330px for dashboard menu with 5 items + auth button)
   // Each item: ~50px (py-3 = 12px top + 12px bottom + ~26px content) + padding
   // Only apply on mobile devices, not desktop
-  const mobileMenuHeight = (isMobile && isMobileMenuOpen) ? 280 : 0;
+  const mobileMenuHeight = (isMobile && isMobileMenuOpen) ? 330 : 0;
   
   // Sync external activeView if provided - always update when it changes
   useEffect(() => {
@@ -49,6 +50,7 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
     { id: 'profile', label: 'EDNA Profile', icon: User, view: 'profile', hasResults: !!results },
     { id: 'workbooks', label: 'Workbooks', icon: FileText, view: 'workbooks', disabled: false },
     { id: 'chat', label: 'AI Mentor', icon: MessageSquare, view: 'chat' },
+    { id: 'zoom-recordings', label: 'Zoom Recordings', icon: Video, view: 'zoom-recordings' },
     { id: 'courses', label: 'Courses', icon: BookOpen, view: 'courses', disabled: true }, // Disabled for now, will be enabled later
   ];
 
@@ -201,6 +203,8 @@ export function CompleteResultsPage({ results, userEmail, onGetFullReport, onVie
             <AIMentorHub onViewChange={onViewChange} isInDashboard={true} />
           </div>
         );
+      case 'zoom-recordings':
+        return <ZoomRecordings />;
       case 'workbooks':
         // Show overlay if no results
         if (!results) {
